@@ -765,33 +765,59 @@ function savePlayerName(val) {
   saveData();
 }
 
+function formatLevelOrbs(rec) {
+  if (!rec || rec.level === '-' || !rec.level) return '-';
+  let dots = '';
+  if (rec.orb1) dots += '🔴';
+  if (rec.orb2) dots += '🔴';
+  if (rec.orb3) dots += '🔴';
+  return dots || '🔴';
+}
+
 function renderRecordsScreen() {
   document.getElementById('player-name-input').value = gameState.playerName || 'プレーヤー';
 
-  const tbody = document.getElementById('records-practice-tbody');
-  tbody.innerHTML = '';
+  const tbodyPrac = document.getElementById('records-practice-tbody');
+  if (tbodyPrac) {
+    tbodyPrac.innerHTML = '';
+    ['add', 'sub'].forEach(type => {
+      for (let s = 1; s <= 10; s++) {
+        const stageKey = `${type}_${s}`;
+        const recs = gameState.records[stageKey] || {};
 
-  ['add', 'sub'].forEach(type => {
-    for (let s = 1; s <= 10; s++) {
-      const stageKey = `${type}_${s}`;
-      const recs = gameState.records[stageKey] || {};
+        let title = type === 'add' ? (s <= 9 ? `${s} の たし` : 'くりあがりあり') : (s <= 9 ? `${s} の ひき` : 'くりさがりあり');
+        const tr = document.createElement('tr');
 
-      let title = type === 'add' ? (s <= 9 ? `${s} の たし` : 'くりあがりあり') : (s <= 9 ? `${s} の ひき` : 'くりさがりあり');
+        const nob = recs.nobori || { level: '-', bestTime: '-', clears: '-' };
+        const kud = recs.kudari || { level: '-', bestTime: '-', clears: '-' };
+        const bar = recs.bara || { level: '-', bestTime: '-', clears: '-' };
+
+        tr.innerHTML = `
+          <td style="font-weight:900"><span class="stage-name-pill">${title}</span></td>
+          <td class="orb-cell">${formatLevelOrbs(nob)}</td><td>${nob.bestTime === '-' ? '-' : nob.bestTime + 's'}</td><td>${nob.clears}</td>
+          <td class="orb-cell">${formatLevelOrbs(kud)}</td><td>${kud.bestTime === '-' ? '-' : kud.bestTime + 's'}</td><td>${kud.clears}</td>
+          <td class="orb-cell">${formatLevelOrbs(bar)}</td><td>${bar.bestTime === '-' ? '-' : bar.bestTime + 's'}</td><td>${bar.clears}</td>
+        `;
+        tbodyPrac.appendChild(tr);
+      }
+    });
+  }
+
+  const tbodyChal = document.getElementById('records-challenge-tbody');
+  if (tbodyChal) {
+    tbodyChal.innerHTML = '';
+    for (let r = 1; r <= 5; r++) {
       const tr = document.createElement('tr');
-
-      const nob = recs.nobori || { level: '-', bestTime: '-', clears: '-' };
-      const kud = recs.kudari || { level: '-', bestTime: '-', clears: '-' };
-      const bar = recs.bara || { level: '-', bestTime: '-', clears: '-' };
-
+      const rec = (gameState.challengeRecords && gameState.challengeRecords[`normal_${r}`]) || { eval: '---', bestTime: '-', clears: '-' };
       tr.innerHTML = `
-        <td style="font-weight:800">${title}</td>
-        <td>${nob.level}</td><td>${nob.bestTime === '-' ? '-' : nob.bestTime + 's'}</td><td>${nob.clears}</td>
-        <td>${kud.level}</td><td>${kud.bestTime === '-' ? '-' : kud.bestTime + 's'}</td><td>${kud.clears}</td>
-        <td>${bar.level}</td><td>${bar.bestTime === '-' ? '-' : bar.bestTime + 's'}</td><td>${bar.clears}</td>
+        <td style="font-weight:900">ランク ${r}</td>
+        <td>${rec.eval || '---'}</td>
+        <td>${rec.bestTime === '-' ? '-' : rec.bestTime + 's'}</td>
+        <td>${rec.clears || '-'}</td>
       `;
-      tbody.appendChild(tr);
+      tbodyChal.appendChild(tr);
     }
-  });
+  }
 }
 
 // Backup & Restore JSON
@@ -831,7 +857,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.1.2';
+const APP_VERSION = 'Ver 3.1.3';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;

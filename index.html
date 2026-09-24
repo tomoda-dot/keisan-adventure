@@ -152,7 +152,7 @@
               </g>
             </svg>
           </div>
-          <div class="version-badge">Ver 3.1.2</div>
+          <div class="version-badge">Ver 3.1.3</div>
         </div>
 
         <div class="title-mode-buttons">
@@ -443,6 +443,10 @@
 
       <!-- ================= 6. RECORDS SCREEN ================= -->
       <section id="screen-records" class="screen-view">
+        <div class="records-banner-header">
+          <ruby>今<rt>いま</rt></ruby>までの<ruby>記<rt>き</rt>録<rt>ろく</rt></ruby>
+        </div>
+
         <div class="records-container">
           <div class="records-header-row">
             <div class="player-name-box">
@@ -452,10 +456,21 @@
             </div>
 
             <div class="records-badges-row">
-              <span class="h-badge badge-lv">LV × <span id="rec-lv-val">0</span></span>
-              <span class="h-badge badge-star">★ × <span id="rec-star-val">0</span></span>
-              <span class="bar-item">🪙 × <span id="rec-coin-val">100</span></span>
-              <span class="bar-item">💎 × <span id="rec-gem-val">0</span></span>
+              <div class="records-pill-badge red-pill">
+                <div class="badge-lv-circle mini">
+                  <span class="lv-lbl-top">レベル</span>
+                  <span class="lv-lbl-bot">LV</span>
+                </div>
+                <span class="badge-x-sym">×</span>
+                <span id="rec-lv-val">0</span>
+              </div>
+              <div class="records-pill-badge blue-pill">
+                <span class="badge-star-icon mini">★</span>
+                <span class="badge-x-sym">×</span>
+                <span id="rec-star-val">0</span>
+              </div>
+              <span class="rec-curr-item">🪙 × <span id="rec-coin-val">100</span></span>
+              <span class="rec-curr-item">💎 × <span id="rec-gem-val">0</span></span>
             </div>
           </div>
 
