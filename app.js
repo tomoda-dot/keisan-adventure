@@ -258,14 +258,12 @@ function updateHeaderStats() {
 let currentScreenId = 'title';
 let screenHistory = ['title'];
 
+let lastMainHubScreen = 'title'; // 'title' | 'practice-select' | 'challenge-select'
+
 // Navigation & Screen Management with Fade-out & Fade-in Transitions
 function openScreen(screenId, isBack = false) {
-  if (screenId === 'title') {
-    screenHistory = ['title'];
-  } else if (!isBack) {
-    if (screenHistory[screenHistory.length - 1] !== screenId) {
-      screenHistory.push(screenId);
-    }
+  if (['title', 'practice-select', 'challenge-select'].includes(screenId)) {
+    lastMainHubScreen = screenId;
   }
   currentScreenId = screenId;
 
@@ -343,12 +341,12 @@ function openScreen(screenId, isBack = false) {
 }
 
 function goBack() {
-  if (screenHistory.length > 1) {
-    screenHistory.pop();
-    const prev = screenHistory[screenHistory.length - 1];
-    openScreen(prev, true);
+  if (currentScreenId === 'practice-select' || currentScreenId === 'challenge-select') {
+    openScreen('title', true);
+  } else if (currentScreenId === 'settings' || currentScreenId === 'records') {
+    openScreen(lastMainHubScreen || 'title', true);
   } else {
-    openScreen('title');
+    openScreen('title', true);
   }
 }
 
@@ -1187,7 +1185,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.4.0';
+const APP_VERSION = 'Ver 3.4.1';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
