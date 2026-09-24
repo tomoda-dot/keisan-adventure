@@ -309,7 +309,7 @@ body {
 
 .svg-sub-text {
   font-family: var(--font-family);
-  font-size: 32px;
+  font-size: 38px;
   font-weight: 900;
   letter-spacing: 2px;
 }
@@ -317,7 +317,7 @@ body {
 .svg-sub-text.stroke-bg {
   fill: none;
   stroke: #ffffff;
-  stroke-width: 12px;
+  stroke-width: 14px;
   stroke-linejoin: round;
   stroke-linecap: round;
 }

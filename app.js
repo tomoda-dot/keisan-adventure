@@ -831,8 +831,28 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
+const APP_VERSION = 'Ver 3.1.1';
+
+function updateVisitCounter() {
+  const BASE_VISITS = 89505431;
+  let localVisits = parseInt(localStorage.getItem('KEISAN_VISIT_COUNT') || '0', 10);
+  localVisits += 1;
+  localStorage.setItem('KEISAN_VISIT_COUNT', localVisits);
+
+  const totalCount = BASE_VISITS + localVisits;
+  const formatted = totalCount.toLocaleString('ja-JP');
+
+  const el = document.getElementById('player-seq-num');
+  if (el) el.innerText = formatted;
+
+  document.querySelectorAll('.version-badge').forEach(badge => {
+    badge.innerText = APP_VERSION;
+  });
+}
+
 // Initial Launch
 window.addEventListener('DOMContentLoaded', () => {
   loadData();
+  updateVisitCounter();
   openScreen('title');
 });
