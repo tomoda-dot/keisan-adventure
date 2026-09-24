@@ -535,9 +535,11 @@ body {
 
 /* ================= 2. PRACTICE SELECT SCREEN ================= */
 .screen-sub-header {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  min-height: 54px;
   margin-bottom: 14px;
   flex-shrink: 0;
 }
@@ -545,6 +547,7 @@ body {
 .practice-title-wrapper {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
@@ -558,6 +561,7 @@ body {
   margin: 0;
   line-height: 1.1;
   transition: text-shadow 0.3s ease;
+  text-align: center;
 }
 
 .practice-title-banner.mode-add {
@@ -572,6 +576,13 @@ body {
     -3px -3px 0 #0d47a1, 3px -3px 0 #0d47a1, -3px 3px 0 #0d47a1, 3px 3px 0 #0d47a1,
     -5px 0 0 #1976d2, 5px 0 0 #1976d2, 0 -5px 0 #1976d2, 0 5px 0 #1976d2,
     0 6px 12px rgba(25, 118, 210, 0.4);
+}
+
+.practice-title-banner.mode-mix {
+  text-shadow: 
+    -3px -3px 0 #4a148c, 3px -3px 0 #4a148c, -3px 3px 0 #4a148c, 3px 3px 0 #4a148c,
+    -5px 0 0 #8e24aa, 5px 0 0 #8e24aa, 0 -5px 0 #8e24aa, 0 5px 0 #8e24aa,
+    0 6px 12px rgba(142, 36, 170, 0.4);
 }
 
 .btn-title-arrow {
@@ -603,7 +614,19 @@ body {
 .btn-title-arrow.blue-arrow {
   background: linear-gradient(135deg, #42a5f5, #1976d2);
   box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.btn-title-arrow.purple-arrow {
+  background: linear-gradient(135deg, #ab47bc, #7b1fa2);
+  box-shadow: 0 4px 10px rgba(123, 31, 162, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.btn-title-arrow.left-arrow {
   padding: 0 2px 0 0;
+}
+
+.btn-title-arrow.right-arrow {
+  padding: 0 0 0 2px;
 }
 
 /* Slide Animations */
@@ -644,6 +667,10 @@ body {
 }
 
 .header-badges {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   gap: 12px;
 }
@@ -1169,6 +1196,13 @@ body.pink-diamond-bg-mode {
 body.cyan-diamond-bg-mode {
   background-color: #e0f7fa !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%234dd0e1' fill-opacity='0.4'%3E%3Cpolygon points='20,6 34,20 20,34 6,20'/%3E%3Cpolygon points='60,46 74,60 60,74 46,60'/%3E%3Cpolygon points='60,10 70,20 60,30 50,20'/%3E%3Cpolygon points='20,50 30,60 20,70 10,60'/%3E%3C/g%3E%3C/svg%3E") !important;
+  background-size: 80px 80px !important;
+  animation: movePinkDiamondBg 25s linear infinite !important;
+}
+
+body.purple-diamond-bg-mode {
+  background-color: #f3e5f5 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23ce93d8' fill-opacity='0.4'%3E%3Cpolygon points='20,6 34,20 20,34 6,20'/%3E%3Cpolygon points='60,46 74,60 60,74 46,60'/%3E%3Cpolygon points='60,10 70,20 60,30 50,20'/%3E%3Cpolygon points='20,50 30,60 20,70 10,60'/%3E%3C/g%3E%3C/svg%3E") !important;
   background-size: 80px 80px !important;
   animation: movePinkDiamondBg 25s linear infinite !important;
 }

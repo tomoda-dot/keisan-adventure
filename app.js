@@ -406,39 +406,75 @@ function switchPracticeTab(type) {
 
 function updatePracticeTitleBanner() {
   const banner = document.getElementById('practice-title-banner');
-  const btnArrow = document.getElementById('btn-arrow-mode');
-  const isAdd = activePracticeTab === 'add';
+  const btnLeft = document.getElementById('btn-arrow-left');
+  const btnRight = document.getElementById('btn-arrow-right');
+  const mode = activePracticeTab;
 
-  document.body.classList.remove('pink-diamond-bg-mode', 'cyan-diamond-bg-mode');
-  if (isAdd) {
+  document.body.classList.remove('pink-diamond-bg-mode', 'cyan-diamond-bg-mode', 'purple-diamond-bg-mode');
+  if (mode === 'add') {
     document.body.classList.add('pink-diamond-bg-mode');
-  } else {
+  } else if (mode === 'sub') {
     document.body.classList.add('cyan-diamond-bg-mode');
+  } else if (mode === 'mix') {
+    document.body.classList.add('purple-diamond-bg-mode');
   }
 
   if (banner) {
-    banner.innerText = isAdd ? 'たしざん れんしゅう' : 'ひきざん れんしゅう';
-    banner.className = `practice-title-banner ${isAdd ? 'mode-add' : 'mode-sub'}`;
+    if (mode === 'add') {
+      banner.innerText = 'たしざん れんしゅう';
+      banner.className = 'practice-title-banner mode-add';
+    } else if (mode === 'sub') {
+      banner.innerText = 'ひきざん れんしゅう';
+      banner.className = 'practice-title-banner mode-sub';
+    } else if (mode === 'mix') {
+      banner.innerText = 'たしざん・ひきざん';
+      banner.className = 'practice-title-banner mode-mix';
+    }
   }
-  if (btnArrow) {
-    btnArrow.innerText = isAdd ? '▶' : '◀';
-    btnArrow.className = `btn-title-arrow ${isAdd ? 'red-arrow' : 'blue-arrow'}`;
-    btnArrow.title = isAdd ? 'ひきざん れんしゅう へ' : 'たしざん れんしゅう へ';
+
+  if (btnLeft) {
+    if (mode === 'add') {
+      btnLeft.style.visibility = 'hidden';
+    } else {
+      btnLeft.style.visibility = 'visible';
+      btnLeft.className = `btn-title-arrow left-arrow ${mode === 'sub' ? 'blue-arrow' : 'purple-arrow'}`;
+      btnLeft.title = mode === 'sub' ? 'たしざん れんしゅう へ' : 'ひきざん れんしゅう へ';
+    }
+  }
+
+  if (btnRight) {
+    if (mode === 'mix') {
+      btnRight.style.visibility = 'hidden';
+    } else {
+      btnRight.style.visibility = 'visible';
+      btnRight.className = `btn-title-arrow right-arrow ${mode === 'add' ? 'red-arrow' : 'blue-arrow'}`;
+      btnRight.title = mode === 'add' ? 'ひきざん れんしゅう へ' : 'たしざん・ひきざん へ';
+    }
   }
 }
 
-function togglePracticeModeSlide() {
+function togglePracticeModeSlide(dir = 'right') {
   if (isSlidingMode) return;
   isSlidingMode = true;
 
   const titleWrapper = document.querySelector('.practice-title-wrapper');
   const gridContainer = document.getElementById('practice-grid-container');
 
-  const goingToSub = (activePracticeTab === 'add');
-  const targetMode = goingToSub ? 'sub' : 'add';
+  const modes = ['add', 'sub', 'mix'];
+  let currentIdx = modes.indexOf(activePracticeTab);
+  if (currentIdx === -1) currentIdx = 0;
 
-  const outAnimClass = goingToSub ? 'anim-slide-out-left' : 'anim-slide-out-right';
-  const inAnimClass = goingToSub ? 'anim-slide-in-right' : 'anim-slide-in-left';
+  let targetIdx;
+  if (dir === 'right') {
+    targetIdx = (currentIdx + 1) % modes.length;
+  } else {
+    targetIdx = (currentIdx - 1 + modes.length) % modes.length;
+  }
+
+  const targetMode = modes[targetIdx];
+
+  const outAnimClass = dir === 'right' ? 'anim-slide-out-left' : 'anim-slide-out-right';
+  const inAnimClass = dir === 'right' ? 'anim-slide-in-right' : 'anim-slide-in-left';
 
   if (typeof audio !== 'undefined' && audio.playKey) {
     audio.playKey();
@@ -479,7 +515,7 @@ function renderPracticeStageGrid() {
   const container = document.getElementById('practice-grid-container');
   container.innerHTML = '';
 
-  const isAdd = activePracticeTab === 'add';
+  const mode = activePracticeTab;
   const stageCount = 10;
 
   for (let s = 1; s <= stageCount; s++) {
@@ -487,10 +523,12 @@ function renderPracticeStageGrid() {
     card.className = `stage-card color-${s}`;
 
     let stageName = '';
-    if (isAdd) {
+    if (mode === 'add') {
       stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の たし</span>` : '<span class="small-sub">くりあがり</span>';
-    } else {
+    } else if (mode === 'sub') {
       stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の ひき</span>` : '<span class="small-sub">くりさがり</span>';
+    } else {
+      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の ミックス</span>` : '<span class="small-sub">くりあがり・くりさがり</span>';
     }
 
     const stageKey = `${activePracticeTab}_${s}`;
@@ -611,9 +649,7 @@ function startPractice(type, stageId, order) {
 
 function generateQuestions(type, stageId, order) {
   let list = [];
-  const isAdd = type === 'add';
-
-  if (isAdd) {
+  if (type === 'add') {
     if (stageId <= 9) {
       for (let i = 1; i <= 9; i++) {
         list.push({ n1: stageId, n2: i, op: '＋', ans: stageId + i });
@@ -627,7 +663,7 @@ function generateQuestions(type, stageId, order) {
       }
       list = list.sort(() => 0.5 - Math.random()).slice(0, 10);
     }
-  } else {
+  } else if (type === 'sub') {
     if (stageId <= 9) {
       for (let i = 1; i <= 10; i++) {
         const n1 = stageId + i;
@@ -640,6 +676,13 @@ function generateQuestions(type, stageId, order) {
         }
       }
       list = list.sort(() => 0.5 - Math.random()).slice(0, 10);
+    }
+  } else if (type === 'mix') {
+    const addList = generateQuestions('add', stageId, order);
+    const subList = generateQuestions('sub', stageId, order);
+    list = addList.slice(0, 5).concat(subList.slice(0, 5));
+    if (order === 'bara') {
+      list = list.sort(() => 0.5 - Math.random());
     }
   }
 
@@ -1144,7 +1187,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.3.3';
+const APP_VERSION = 'Ver 3.3.8';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
