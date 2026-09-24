@@ -83,12 +83,12 @@ body {
   border: none;
 }
 
-/* Global Header */
+/* Global Header matching original screenshot transparent overlay */
 .global-header {
   height: 60px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  border-bottom: 3px solid #e0e0e0;
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -101,6 +101,47 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Header SVG Icon Buttons matching original screenshot */
+.btn-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #546e7a;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+  padding: 0;
+}
+
+.btn-header-icon:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: #37474f;
+}
+
+.btn-header-icon:active {
+  transform: translateY(1px) scale(0.96);
+  box-shadow: none;
+}
+
+/* BGM Icon Button - White Circle with Grey Border & Dark Grey Note */
+.btn-header-icon.bgm-btn {
+  background: #ffffff;
+  color: #546e7a;
+  border: 2px solid #546e7a;
+}
+
+.btn-header-icon.bgm-btn.muted {
+  background: #78909c;
+  color: #cfd8dc;
+  border-color: #455a64;
+  opacity: 0.6;
 }
 
 /* Language Switcher */
