@@ -158,19 +158,22 @@
         <div class="title-mode-buttons">
           <button class="btn-title-mode mode-practice" onclick="openPracticeSelect('add')">
             <div class="mode-label">たしざん・ひきざん<br>れんしゅう</div>
-            <div class="mode-badge badge-lv">
-              <span class="badge-icon">LV</span>
-              <span class="badge-x">×</span>
-              <span id="title-lv-count">0</span>
+            <div class="mode-badge-row">
+              <div class="badge-lv-circle">
+                <span class="lv-lbl-top">レベル</span>
+                <span class="lv-lbl-bot">LV</span>
+              </div>
+              <span class="badge-x-sym">×</span>
+              <span id="title-lv-count" class="badge-num-val">0</span>
             </div>
           </button>
 
           <button class="btn-title-mode mode-challenge" onclick="openChallengeSelect()">
             <div class="mode-label">けいさん<br>チャレンジ</div>
-            <div class="mode-badge badge-star">
-              <span class="badge-icon">★</span>
-              <span class="badge-x">×</span>
-              <span id="title-star-count">0</span>
+            <div class="mode-badge-row">
+              <span class="badge-star-icon">★</span>
+              <span class="badge-x-sym">×</span>
+              <span id="title-star-count" class="badge-num-val">0</span>
             </div>
           </button>
         </div>

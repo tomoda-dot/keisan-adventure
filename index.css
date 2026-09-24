@@ -368,22 +368,24 @@ body {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Title Mode Buttons */
+/* Title Mode Buttons - Matching Original Screenshot */
 .title-mode-buttons {
   display: flex;
   gap: 32px;
-  margin: 24px 0;
+  margin: 18px 0;
   width: 100%;
-  max-width: 680px;
+  max-width: 720px;
   justify-content: center;
 }
 
 .btn-title-mode {
   flex: 1;
-  height: 130px;
-  border-radius: 24px;
-  border: 5px solid #ffffff;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 5px 0 rgba(0,0,0,0.2);
+  height: 140px;
+  border-radius: 26px;
+  border: 4px solid #ffffff;
+  box-shadow: 
+    0 0 0 2.5px rgba(255, 255, 255, 0.95),
+    0 8px 18px rgba(0, 0, 0, 0.22);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -400,59 +402,121 @@ body {
 
 .btn-title-mode:active {
   transform: translateY(2px) scale(0.98);
-  box-shadow: 0 2px 0 rgba(0,0,0,0.2);
 }
 
 .mode-practice {
-  background: linear-gradient(135deg, #ff5252, #e53935);
+  background: linear-gradient(180deg, #ff453a 0%, #e02d22 100%);
   color: #ffffff;
 }
 
 .mode-challenge {
-  background: linear-gradient(135deg, #42a5f5, #1e88e5);
+  background: linear-gradient(180deg, #3897f0 0%, #1d7cd6 100%);
   color: #ffffff;
 }
 
 .mode-label {
-  font-size: 24px;
-  font-weight: 900;
-  line-height: 1.2;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.mode-badge {
-  margin-top: 10px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 18px;
-  padding: 4px 18px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 18px;
-  font-weight: 900;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-}
-
-.badge-lv { color: var(--red-primary); }
-.badge-star { color: #f57f17; }
-
-/* Currencies Row */
-.title-currencies {
-  display: flex;
-  gap: 36px;
+  font-family: var(--font-family);
   font-size: 26px;
   font-weight: 900;
+  line-height: 1.25;
+  color: #ffffff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  margin-bottom: 6px;
+}
+
+/* Mode Badge Row (Matching Original Screenshot: White circle LV badge / White Star) */
+.mode-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #ffffff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+/* White LV Circle Icon */
+.badge-lv-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #e02d22;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.lv-lbl-top {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.lv-lbl-bot {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+/* Star Icon */
+.badge-star-icon {
+  font-size: 38px;
+  color: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  line-height: 1;
+}
+
+.badge-x-sym {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.badge-num-val {
+  font-family: var(--font-family);
+  font-size: 44px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+/* Currencies Row matching original screenshot (Transparent background with thick outlined text) */
+.title-currencies {
+  display: flex;
+  gap: 48px;
+  margin-top: 6px;
 }
 
 .currency-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #ffffff;
-  padding: 8px 24px;
-  border-radius: 24px;
-  border: 3px solid #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  gap: 8px;
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  font-family: var(--font-family);
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 
+    2px 2px 0 #37474f,
+    -2px -2px 0 #37474f,
+    2px -2px 0 #37474f,
+    -2px 2px 0 #37474f,
+    0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.c-icon {
+  font-size: 38px;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+}
+
+.c-x {
+  font-size: 26px;
+  font-weight: 900;
 }
 
 .title-footer-msg {
