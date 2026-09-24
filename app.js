@@ -524,11 +524,11 @@ function renderPracticeStageGrid() {
 
     let stageName = '';
     if (mode === 'add') {
-      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の たし</span>` : '<span class="small-sub">くりあがり</span>';
+      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub">の たしざん</span>` : '<span class="small-sub">くりあがり</span>';
     } else if (mode === 'sub') {
-      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の ひき</span>` : '<span class="small-sub">くりさがり</span>';
+      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub">の ひきざん</span>` : '<span class="small-sub">くりさがり</span>';
     } else {
-      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の ミックス</span>` : '<span class="small-sub">くりあがり・くりさがり</span>';
+      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub">の ミックス</span>` : '<span class="small-sub">くりあがり・くりさがり</span>';
     }
 
     const stageKey = `${activePracticeTab}_${s}`;
@@ -1187,7 +1187,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.3.8';
+const APP_VERSION = 'Ver 3.3.9';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;

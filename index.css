@@ -703,19 +703,34 @@ body {
 }
 
 .stage-card {
-  border-radius: 20px;
-  padding: 14px;
-  border: 3px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 12px 14px 12px 14px;
+  border: 3.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stage-card::before {
+  content: '';
+  position: absolute;
+  top: -35px;
+  left: -25px;
+  width: 155px;
+  height: 155px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .stage-card:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
 }
 
 /* Vibrant Color Schemes for Stages 1..10 */
@@ -731,6 +746,8 @@ body {
 .stage-card.color-10 { background: linear-gradient(135deg, #e91e63, #c2185b); border-color: #f48fb1; }
 
 .stage-card-header {
+  position: relative;
+  z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -741,37 +758,43 @@ body {
 .stage-title {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 2px;
   color: #ffffff !important;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.5), 0 0 3px rgba(0,0,0,0.4);
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
   line-height: 1;
 }
 
 .big-num {
-  font-size: 46px;
+  font-size: 62px;
   font-weight: 900;
   color: #ffffff !important;
-  line-height: 1;
+  line-height: 0.95;
+  letter-spacing: -2px;
 }
 
 .small-sub {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 900;
   color: #ffffff !important;
+  letter-spacing: -0.5px;
+  align-self: flex-end;
+  padding-bottom: 2px;
 }
 
-/* Coin Reward Box - Layout Matching Screenshot 3 */
+/* Coin Reward Box - Layout Matching Reference Image */
 .stage-coin-reward-box {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  position: relative;
+  z-index: 2;
 }
 
 .coin-label-text {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   line-height: 1.1;
   letter-spacing: 0.5px;
 }
@@ -781,57 +804,62 @@ body {
   align-items: center;
   gap: 3px;
   color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .big-coin-icon {
   font-size: 28px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
 }
 
 .coin-x {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 900;
 }
 
 .coin-num {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 900;
 }
 
 .stage-sub-buttons {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
 
 .btn-sub-mode {
-  border-radius: 14px;
-  border: 2px solid #ffffff;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 8px 2px;
+  border-radius: 18px;
+  border: none;
+  background: #ffffff;
+  padding: 8px 2px 7px 2px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  transition: all 0.15s;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+  gap: 5px;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
 
 .btn-sub-mode:hover {
   background: #ffffff;
   transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
 }
 
 .btn-sub-mode:active {
   transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sub-mode-lbl {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 900;
   color: #37474f;
+  line-height: 1;
 }
 
 .sub-mode-dots {
@@ -841,18 +869,18 @@ body {
 
 /* 3D Glossy Red Spheres / Orbs */
 .dot {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: #cfd8dc;
-  border: 1.5px solid #b0bec5;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+  background: radial-gradient(circle at 35% 35%, #eceff1 0%, #cfd8dc 60%, #90a4ae 100%);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: none;
 }
 
 .dot.cleared {
   background: radial-gradient(circle at 35% 35%, #ff8a80 0%, #ff1744 55%, #b71c1c 100%);
-  border: 1px solid #b71c1c;
-  box-shadow: 0 2px 6px rgba(213, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  border: none;
+  box-shadow: 0 2.5px 6px rgba(183, 28, 28, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.85);
 }
 
 .bottom-currency-bar {
