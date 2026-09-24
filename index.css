@@ -52,9 +52,9 @@ body {
     linear-gradient(-45deg, rgba(200, 230, 201, 0.4) 25%, transparent 25%), 
     linear-gradient(45deg, transparent 75%, rgba(200, 230, 201, 0.4) 75%), 
     linear-gradient(-45deg, transparent 75%, rgba(200, 230, 201, 0.4) 75%);
-  background-size: 32px 32px;
-  background-position: 0 0, 0 16px, 16px -16px, -16px 0px;
-  animation: moveBodyBgPattern 16s linear infinite;
+  background-size: 80px 80px;
+  background-position: 0 0, 0 40px, 40px -40px, -40px 0px;
+  animation: moveBodyBgPattern 20s linear infinite;
   color: var(--txt-color);
   display: flex;
   justify-content: center;
@@ -63,10 +63,10 @@ body {
 
 @keyframes moveBodyBgPattern {
   0% {
-    background-position: 0 0, 0 16px, 16px -16px, -16px 0px;
+    background-position: 0 0, 0 40px, 40px -40px, -40px 0px;
   }
   100% {
-    background-position: 320px -320px, 320px -304px, 336px -336px, 304px -320px;
+    background-position: 800px -800px, 800px -760px, 840px -840px, 760px -800px;
   }
 }
 
@@ -268,19 +268,19 @@ body {
     linear-gradient(-45deg, #c8e6c9 25%, transparent 25%), 
     linear-gradient(45deg, transparent 75%, #c8e6c9 75%), 
     linear-gradient(-45deg, transparent 75%, #c8e6c9 75%);
-  background-size: 36px 36px;
-  background-position: 0 0, 0 18px, 18px -18px, -18px 0px;
-  animation: moveBgPattern 12s linear infinite;
+  background-size: 80px 80px;
+  background-position: 0 0, 0 40px, 40px -40px, -40px 0px;
+  animation: moveBgPattern 16s linear infinite;
   text-align: center;
   padding: 16px 32px;
 }
 
 @keyframes moveBgPattern {
   0% {
-    background-position: 0 0, 0 18px, 18px -18px, -18px 0px;
+    background-position: 0 0, 0 40px, 40px -40px, -40px 0px;
   }
   100% {
-    background-position: 360px -360px, 360px -342px, 378px -378px, 342px -360px;
+    background-position: 800px -800px, 800px -760px, 840px -840px, 760px -800px;
   }
 }
 
