@@ -547,8 +547,7 @@ function renderGameplayQuestion() {
 
   renderHearts();
 
-  const keypad = document.getElementById('keypad-panel');
-  keypad.style.order = gameState.settings.leftHand ? '-1' : '1';
+  applyKeypadLayout();
 
   if (gameState.settings.autoRead) {
     const opText = q.op === '＋' ? 'たす' : 'ひく';
@@ -752,11 +751,60 @@ function closeResultModal() {
 }
 
 /* ================= SETTINGS & RECORDS MANAGEMENT ================= */
+function applyKeypadLayout() {
+  const keypad = document.getElementById('keypad-panel');
+  if (keypad) {
+    keypad.style.order = gameState.settings.leftHand ? '-1' : '1';
+  }
+
+  const grid = document.getElementById('keypad-grid');
+  if (!grid) return;
+
+  const isReverse = !!gameState.settings.reverseKeys;
+
+  if (isReverse) {
+    grid.innerHTML = `
+      <button class="key-btn" onclick="pressKey('9')">9</button>
+      <button class="key-btn" onclick="pressKey('8')">8</button>
+      <button class="key-btn" onclick="pressKey('7')">7</button>
+      
+      <button class="key-btn" onclick="pressKey('6')">6</button>
+      <button class="key-btn" onclick="pressKey('5')">5</button>
+      <button class="key-btn" onclick="pressKey('4')">4</button>
+
+      <button class="key-btn" onclick="pressKey('3')">3</button>
+      <button class="key-btn" onclick="pressKey('2')">2</button>
+      <button class="key-btn" onclick="pressKey('1')">1</button>
+
+      <button class="key-btn key-clear key-span2" onclick="pressKey('C')">C</button>
+      <button class="key-btn key-zero" onclick="pressKey('0')">0</button>
+    `;
+  } else {
+    grid.innerHTML = `
+      <button class="key-btn" onclick="pressKey('7')">7</button>
+      <button class="key-btn" onclick="pressKey('8')">8</button>
+      <button class="key-btn" onclick="pressKey('9')">9</button>
+      
+      <button class="key-btn" onclick="pressKey('4')">4</button>
+      <button class="key-btn" onclick="pressKey('5')">5</button>
+      <button class="key-btn" onclick="pressKey('6')">6</button>
+
+      <button class="key-btn" onclick="pressKey('1')">1</button>
+      <button class="key-btn" onclick="pressKey('2')">2</button>
+      <button class="key-btn" onclick="pressKey('3')">3</button>
+
+      <button class="key-btn key-zero key-span2" onclick="pressKey('0')">0</button>
+      <button class="key-btn key-clear" onclick="pressKey('C')">C</button>
+    `;
+  }
+}
+
 function syncSettingsUI() {
   document.getElementById('chk-show-ms').checked = gameState.settings.showMs || false;
   document.getElementById('chk-auto-read').checked = gameState.settings.autoRead !== false;
   document.getElementById('chk-left-hand').checked = gameState.settings.leftHand || false;
   document.getElementById('chk-reverse-keys').checked = gameState.settings.reverseKeys || false;
+  applyKeypadLayout();
 
   const mode = gameState.settings.readingMode || 'std';
   document.getElementById('read-std')?.classList.toggle('active', mode === 'std');
@@ -782,6 +830,7 @@ function saveSettingsFromUI() {
   gameState.settings.autoRead = document.getElementById('chk-auto-read').checked;
   gameState.settings.leftHand = document.getElementById('chk-left-hand').checked;
   gameState.settings.reverseKeys = document.getElementById('chk-reverse-keys').checked;
+  applyKeypadLayout();
   saveData();
 }
 
@@ -946,7 +995,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.2.9';
+const APP_VERSION = 'Ver 3.3.0';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
