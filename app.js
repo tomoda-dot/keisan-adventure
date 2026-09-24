@@ -272,10 +272,19 @@ function openScreen(screenId) {
       backBtn.classList.remove('hidden');
     }
 
+    const header = document.querySelector('.global-header');
+    const recTitle = document.getElementById('header-title-records');
+
     if (screenId === 'records') {
+      header?.classList.add('records-mode');
+      recTitle?.classList.remove('hidden');
       renderRecordsScreen();
-    } else if (screenId === 'settings') {
-      syncSettingsUI();
+    } else {
+      header?.classList.remove('records-mode');
+      recTitle?.classList.add('hidden');
+      if (screenId === 'settings') {
+        syncSettingsUI();
+      }
     }
   }, 150);
 }
@@ -334,9 +343,9 @@ function renderPracticeStageGrid() {
 
     let stageName = '';
     if (isAdd) {
-      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の たし</span>` : '<span class="small-sub">くりあがりあり</span>';
+      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の たし</span>` : '<span class="small-sub">くりあがり</span>';
     } else {
-      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の ひき</span>` : '<span class="small-sub">くりさがりあり</span>';
+      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の ひき</span>` : '<span class="small-sub">くりさがり</span>';
     }
 
     const stageKey = `${activePracticeTab}_${s}`;
@@ -505,7 +514,7 @@ function renderGameplayQuestion() {
   document.getElementById('gameplay-feedback-msg').className = 'feedback-msg';
 
   const isAdd = currentSession.type === 'add';
-  let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たし` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} の ひき` : 'くりさがりあり');
+  let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たし` : 'くりあがり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} の ひき` : 'くりさがり');
   let orderLbl = getOrderLabel(currentSession.order);
 
   document.getElementById('gameplay-stage-title').innerText = `${stageName} ${orderLbl}`;
@@ -688,7 +697,7 @@ function renderResultBlackboardModal(timeSec, qCount, wrongCount, coins, isNoMis
   card.style.color = '#ffffff';
 
   const isAdd = currentSession.type === 'add';
-  let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たし` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} の ひき` : 'くりさがりあり');
+  let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たし` : 'くりあがり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} の ひき` : 'くりさがり');
   let orderLbl = getOrderLabel(currentSession.order);
 
   card.innerHTML = `
@@ -825,6 +834,41 @@ function formatLevelOrbs(rec) {
   return dots || '🔴';
 }
 
+let activeRecordsTab = 'add'; // 'add' | 'sub'
+
+function switchRecordsTab(type) {
+  activeRecordsTab = type;
+  document.getElementById('rec-tab-add')?.classList.toggle('active', type === 'add');
+  document.getElementById('rec-tab-sub')?.classList.toggle('active', type === 'sub');
+  renderRecordsPracticeTable();
+}
+
+function renderRecordsPracticeTable() {
+  const tbodyPrac = document.getElementById('records-practice-tbody');
+  if (!tbodyPrac) return;
+  tbodyPrac.innerHTML = '';
+  const type = activeRecordsTab;
+  for (let s = 1; s <= 10; s++) {
+    const stageKey = `${type}_${s}`;
+    const recs = gameState.records[stageKey] || {};
+
+    let title = type === 'add' ? (s <= 9 ? `${s} の たし` : 'くりあがり') : (s <= 9 ? `${s} の ひき` : 'くりさがり');
+    const tr = document.createElement('tr');
+
+    const nob = recs.nobori || { level: '-', bestTime: '-', clears: '-' };
+    const kud = recs.kudari || { level: '-', bestTime: '-', clears: '-' };
+    const bar = recs.bara || { level: '-', bestTime: '-', clears: '-' };
+
+    tr.innerHTML = `
+      <td style="font-weight:900"><span class="stage-name-pill">${title}</span></td>
+      <td class="orb-cell">${formatLevelOrbs(nob)}</td><td>${nob.bestTime === '-' ? '-' : nob.bestTime + 's'}</td><td>${nob.clears}</td>
+      <td class="orb-cell">${formatLevelOrbs(kud)}</td><td>${kud.bestTime === '-' ? '-' : kud.bestTime + 's'}</td><td>${kud.clears}</td>
+      <td class="orb-cell">${formatLevelOrbs(bar)}</td><td>${bar.bestTime === '-' ? '-' : bar.bestTime + 's'}</td><td>${bar.clears}</td>
+    `;
+    tbodyPrac.appendChild(tr);
+  }
+}
+
 function renderRecordsScreen() {
   document.getElementById('player-name-input').value = gameState.playerName || 'プレーヤー';
 
@@ -835,31 +879,7 @@ function renderRecordsScreen() {
   const thBar = document.getElementById('rec-th-bara');
   if (thBar) thBar.innerText = getRandOrderLabel();
 
-  const tbodyPrac = document.getElementById('records-practice-tbody');
-  if (tbodyPrac) {
-    tbodyPrac.innerHTML = '';
-    ['add', 'sub'].forEach(type => {
-      for (let s = 1; s <= 10; s++) {
-        const stageKey = `${type}_${s}`;
-        const recs = gameState.records[stageKey] || {};
-
-        let title = type === 'add' ? (s <= 9 ? `${s} の たし` : 'くりあがりあり') : (s <= 9 ? `${s} の ひき` : 'くりさがりあり');
-        const tr = document.createElement('tr');
-
-        const nob = recs.nobori || { level: '-', bestTime: '-', clears: '-' };
-        const kud = recs.kudari || { level: '-', bestTime: '-', clears: '-' };
-        const bar = recs.bara || { level: '-', bestTime: '-', clears: '-' };
-
-        tr.innerHTML = `
-          <td style="font-weight:900"><span class="stage-name-pill">${title}</span></td>
-          <td class="orb-cell">${formatLevelOrbs(nob)}</td><td>${nob.bestTime === '-' ? '-' : nob.bestTime + 's'}</td><td>${nob.clears}</td>
-          <td class="orb-cell">${formatLevelOrbs(kud)}</td><td>${kud.bestTime === '-' ? '-' : kud.bestTime + 's'}</td><td>${kud.clears}</td>
-          <td class="orb-cell">${formatLevelOrbs(bar)}</td><td>${bar.bestTime === '-' ? '-' : bar.bestTime + 's'}</td><td>${bar.clears}</td>
-        `;
-        tbodyPrac.appendChild(tr);
-      }
-    });
-  }
+  renderRecordsPracticeTable();
 
   const tbodyChal = document.getElementById('records-challenge-tbody');
   if (tbodyChal) {
@@ -915,7 +935,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.1.8';
+const APP_VERSION = 'Ver 3.1.9';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;

@@ -32,7 +32,9 @@
       </div>
 
       <div class="header-center" id="header-title-container">
-        <!-- Dynamic screen header title if needed -->
+        <div id="header-title-records" class="header-title-records hidden">
+          <ruby>今<rt>いま</rt></ruby>までの<ruby>記<rt>き</rt>録<rt>ろく</rt></ruby>
+        </div>
       </div>
 
       <div class="header-right">
@@ -152,7 +154,7 @@
               </g>
             </svg>
           </div>
-          <div class="version-badge">Ver 3.1.8</div>
+          <div class="version-badge">Ver 3.1.9</div>
         </div>
 
         <div class="title-mode-buttons">
@@ -432,10 +434,6 @@
 
       <!-- ================= 6. RECORDS SCREEN ================= -->
       <section id="screen-records" class="screen-view">
-        <div class="records-banner-header">
-          <ruby>今<rt>いま</rt></ruby>までの<ruby>記<rt>き</rt>録<rt>ろく</rt></ruby>
-        </div>
-
         <div class="records-container">
           <div class="records-header-row">
             <div class="player-name-box">
@@ -485,7 +483,10 @@
           <div class="records-tables-flex">
             <!-- Left Matrix: Practice Records -->
             <div class="records-table-wrapper">
-              <h3 class="table-sec-title title-red">◆ たしざん・ひきざん れんしゅう</h3>
+              <div class="rec-tab-selector">
+                <button id="rec-tab-add" class="rec-tab-btn active" onclick="switchRecordsTab('add')">➕ たしざん れんしゅう</button>
+                <button id="rec-tab-sub" class="rec-tab-btn" onclick="switchRecordsTab('sub')">➖ ひきざん れんしゅう</button>
+              </div>
               <div class="records-scroll-table">
                 <table class="rec-table">
                   <thead>

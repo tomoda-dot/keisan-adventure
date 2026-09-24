@@ -1288,23 +1288,56 @@ body {
   transform: translateY(1px);
 }
 
-/* ================= 6. RECORDS SCREEN ================= */
-.records-banner-header {
-  width: 100vw;
-  height: 52px;
-  background: #5ebec4;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Records Screen Colored Global Header */
+.global-header.records-mode {
+  background: #5ebec4 !important;
+  border-bottom: 3.5px solid #4db6ac;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-title-records {
   font-family: var(--font-family);
   font-size: 26px;
   font-weight: 900;
+  color: #ffffff;
   letter-spacing: 2px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  margin: -16px -32px 14px -32px;
-  padding: 0 32px;
-  flex-shrink: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+}
+
+.header-title-records rt {
+  font-size: 11px;
+  font-weight: 800;
+  color: #e0f2f1;
+}
+
+/* Records Practice Table Tab Selector */
+.rec-tab-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.rec-tab-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 2.5px solid #5ebec4;
+  background: #ffffff;
+  color: #00796b;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.rec-tab-btn.active {
+  background: #5ebec4;
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(94, 190, 196, 0.4);
 }
 
 .records-container {
