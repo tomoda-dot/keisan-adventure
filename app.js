@@ -333,9 +333,9 @@ function renderPracticeStageGrid() {
 
     let stageName = '';
     if (isAdd) {
-      stageName = s <= 9 ? `${s} の たしざん` : 'くりあがりあり';
+      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の たし</span>` : '<span class="small-sub">くりあがりあり</span>';
     } else {
-      stageName = s <= 9 ? `${s} を ひく` : 'くりさがりあり';
+      stageName = s <= 9 ? `<span class="big-num">${s}</span><span class="small-sub"> の ひき</span>` : '<span class="small-sub">くりさがりあり</span>';
     }
 
     const stageKey = `${activePracticeTab}_${s}`;
@@ -504,7 +504,7 @@ function renderGameplayQuestion() {
   document.getElementById('gameplay-feedback-msg').className = 'feedback-msg';
 
   const isAdd = currentSession.type === 'add';
-  let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たしざん` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} を ひく` : 'くりさがりあり');
+  let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たし` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} の ひき` : 'くりさがりあり');
   let orderLbl = currentSession.order === 'nobori' ? 'のぼり' : (currentSession.order === 'kudari' ? 'くだり' : 'ばらばら');
 
   document.getElementById('gameplay-stage-title').innerText = `${stageName} ${orderLbl}`;
@@ -687,7 +687,7 @@ function renderResultBlackboardModal(timeSec, qCount, wrongCount, coins, isNoMis
   card.style.color = '#ffffff';
 
   const isAdd = currentSession.type === 'add';
-  let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たしざん` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} を ひく` : 'くりさがりあり');
+  let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たし` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} の ひき` : 'くりさがりあり');
   let orderLbl = currentSession.order === 'nobori' ? 'のぼり' : (currentSession.order === 'kudari' ? 'くだり' : 'ばらばら');
 
   card.innerHTML = `
@@ -776,7 +776,7 @@ function renderRecordsScreen() {
       const stageKey = `${type}_${s}`;
       const recs = gameState.records[stageKey] || {};
 
-      let title = type === 'add' ? (s <= 9 ? `${s}のたしざん` : 'くりあがりあり') : (s <= 9 ? `${s}をひく` : 'くりさがりあり');
+      let title = type === 'add' ? (s <= 9 ? `${s} の たし` : 'くりあがりあり') : (s <= 9 ? `${s} の ひき` : 'くりさがりあり');
       const tr = document.createElement('tr');
 
       const nob = recs.nobori || { level: '-', bestTime: '-', clears: '-' };

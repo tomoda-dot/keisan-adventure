@@ -455,14 +455,27 @@ body {
   margin-bottom: 6px;
 }
 
-/* ALL White Text Stage Titles Large & Crisp */
+/* ALL White Text Stage Titles with Font-up Number Part */
 .stage-title {
-  font-size: 28px;
-  font-weight: 900;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
   color: #ffffff !important;
   text-shadow: 0 2px 5px rgba(0,0,0,0.5), 0 0 3px rgba(0,0,0,0.4);
-  line-height: 1.1;
-  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.big-num {
+  font-size: 46px;
+  font-weight: 900;
+  color: #ffffff !important;
+  line-height: 1;
+}
+
+.small-sub {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffffff !important;
 }
 
 /* Coin Reward Box - Layout Matching Screenshot 3 */
