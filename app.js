@@ -82,7 +82,7 @@ class SoundEngine {
   }
 
   playKey() {
-    this.playBeep(700, 0.05);
+    this.playBeep(750, 0.05);
   }
 
   playCorrect() {
@@ -170,6 +170,14 @@ class SoundEngine {
 
 const audio = new SoundEngine();
 
+// Global Button SE Sound Listener
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button, .btn-icon, .stage-card, .challenge-card, .tab-btn');
+  if (btn) {
+    audio.playKey();
+  }
+});
+
 // Load / Save Helpers
 function loadData() {
   try {
@@ -219,26 +227,36 @@ function updateHeaderStats() {
   document.getElementById('rec-total-gems').innerText = gameState.totalGemsEarned;
 }
 
-// Navigation & Screen Management
+// Navigation & Screen Management with Fade-out & Fade-in Transitions
 function openScreen(screenId) {
-  document.querySelectorAll('.screen-view').forEach(sc => sc.classList.remove('active'));
-  const target = document.getElementById('screen-' + screenId);
-  if (target) {
-    target.classList.add('active');
+  const currentActive = document.querySelector('.screen-view.active');
+  if (currentActive) {
+    currentActive.style.opacity = '0';
+    currentActive.style.transform = 'scale(0.98)';
   }
 
-  const backBtn = document.getElementById('btn-back');
-  if (screenId === 'title') {
-    backBtn.classList.add('hidden');
-  } else {
-    backBtn.classList.remove('hidden');
-  }
+  setTimeout(() => {
+    document.querySelectorAll('.screen-view').forEach(sc => sc.classList.remove('active'));
+    const target = document.getElementById('screen-' + screenId);
+    if (target) {
+      target.classList.add('active');
+      target.style.opacity = '1';
+      target.style.transform = 'scale(1)';
+    }
 
-  if (screenId === 'records') {
-    renderRecordsScreen();
-  } else if (screenId === 'settings') {
-    syncSettingsUI();
-  }
+    const backBtn = document.getElementById('btn-back');
+    if (screenId === 'title') {
+      backBtn.classList.add('hidden');
+    } else {
+      backBtn.classList.remove('hidden');
+    }
+
+    if (screenId === 'records') {
+      renderRecordsScreen();
+    } else if (screenId === 'settings') {
+      syncSettingsUI();
+    }
+  }, 150);
 }
 
 function goBack() {
@@ -291,7 +309,6 @@ function renderPracticeStageGrid() {
 
   for (let s = 1; s <= stageCount; s++) {
     const card = document.createElement('div');
-    // Vibrant Color Class color-1 .. color-10
     card.className = `stage-card color-${s}`;
 
     let stageName = '';
@@ -356,9 +373,8 @@ function triggerCountdown(onComplete) {
       const step = steps[stepIdx];
       textEl.innerText = step.text;
       
-      // Reset CSS animation
       textEl.style.animation = 'none';
-      void textEl.offsetWidth; // Trigger reflow
+      void textEl.offsetWidth;
       textEl.style.animation = 'countPop 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 
       if (step.startTone) {
@@ -471,6 +487,14 @@ function renderGameplayQuestion() {
   document.getElementById('formula-num2').innerText = q.n2;
   document.getElementById('formula-answer-box').innerText = '?';
 
+  // Re-trigger Formula Slide-up Animation from Bottom
+  const fBox = document.querySelector('.formula-box');
+  if (fBox) {
+    fBox.style.animation = 'none';
+    void fBox.offsetWidth; // trigger reflow
+    fBox.style.animation = 'slideUpFromBottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+  }
+
   renderHearts();
 
   const keypad = document.getElementById('keypad-panel');
@@ -493,8 +517,6 @@ function renderHearts() {
 
 function pressKey(key) {
   if (currentSession.isCountingDown) return;
-
-  audio.playKey();
 
   if (key === 'C') {
     currentSession.typedVal = '';
@@ -553,14 +575,12 @@ function checkAnswer() {
 
 /* ================= PHYSICAL KEYBOARD / NUMPAD LISTENER ================= */
 window.addEventListener('keydown', (e) => {
-  // Only handle during active gameplay when screen is gameplay
   const activeScreen = document.querySelector('.screen-view.active');
   if (!activeScreen || activeScreen.id !== 'screen-gameplay') return;
   if (currentSession.isCountingDown) return;
 
   const key = e.key;
 
-  // Number Keys '0'-'9' or Numpad '0'-'9'
   if (key >= '0' && key <= '9') {
     e.preventDefault();
     highlightKeyBtn(key);
