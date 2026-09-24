@@ -1250,6 +1250,12 @@ body {
   border-top: 2.5px solid #f7931e;
 }
 
+.settings-backup-section .settings-sec-title {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 8px;
+}
+
 .backup-row {
   display: flex;
   align-items: center;
