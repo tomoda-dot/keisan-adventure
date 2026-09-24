@@ -152,7 +152,7 @@
               </g>
             </svg>
           </div>
-          <div class="version-badge">Ver 3.1.7</div>
+          <div class="version-badge">Ver 3.1.8</div>
         </div>
 
         <div class="title-mode-buttons">
@@ -394,22 +394,22 @@
                 <label class="custom-checkbox">
                   <input type="checkbox" id="chk-show-ms" onchange="saveSettingsFromUI()">
                   <span class="checkmark"></span>
-                  <span class="cb-text">タイムを小数点以下まで表示する。</span>
+                  <span class="cb-text">タイムを<ruby>小<rt>しょう</rt>数<rt>すう</rt>点<rt>てん</rt>以<rt>い</rt>下<rt>か</rt></ruby>まで<ruby>表<rt>ひょう</rt>示<rt>じ</rt></ruby>する。</span>
                 </label>
                 <label class="custom-checkbox">
                   <input type="checkbox" id="chk-auto-read" onchange="saveSettingsFromUI()">
                   <span class="checkmark"></span>
-                  <span class="cb-text">「聞いて計算」を自動読み上げする。</span>
+                  <span class="cb-text">「<ruby>問<rt>き</rt></ruby>いて<ruby>計<rt>けい</rt>算<rt>さん</rt></ruby>」を<ruby>自<rt>じ</rt>動<rt>どう</rt>読<rt>よ</rt></ruby>み<ruby>上<rt>あ</rt></ruby>げする。</span>
                 </label>
                 <label class="custom-checkbox">
                   <input type="checkbox" id="chk-left-hand" onchange="saveSettingsFromUI()">
                   <span class="checkmark"></span>
-                  <span class="cb-text">テンキーを左に表示する。（左利き）</span>
+                  <span class="cb-text">テンキーを<ruby>左<rt>ひだり</rt></ruby>に<ruby>表<rt>ひょう</rt>示<rt>じ</rt></ruby>する。（<ruby>左<rt>ひだり</rt>利<rt>き</rt></ruby>き）</span>
                 </label>
                 <label class="custom-checkbox">
                   <input type="checkbox" id="chk-reverse-keys" onchange="saveSettingsFromUI()">
                   <span class="checkmark"></span>
-                  <span class="cb-text">キーのならびを反対にする。</span>
+                  <span class="cb-text">キーのならびを<ruby>反<rt>はん</rt>対<rt>たい</rt></ruby>にする。</span>
                 </label>
               </div>
             </div>
@@ -418,11 +418,13 @@
           <!-- Bottom Data Backup -->
           <div class="settings-backup-section">
             <h3 class="settings-sec-title">◆ データのバックアップ</h3>
-            <p class="backup-desc">ファイルからデータの復元や引継ぎができます。</p>
-            <div class="backup-btn-group">
-              <button class="btn-backup export" onclick="exportDataJSON()">ファイルに書き出し</button>
-              <button class="btn-backup import" onclick="triggerImportJSON()">ファイルから読み込み</button>
-              <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="handleImportJSON(event)">
+            <div class="backup-row">
+              <p class="backup-desc">ファイルからデータの<ruby>復<rt>ふく</rt>元<rt>げん</rt></ruby>や<ruby>引<rt>ひ</rt>き<ruby>継<rt>つ</rt></ruby>ぎができます。</p>
+              <div class="backup-btn-group">
+                <button class="btn-backup export" onclick="exportDataJSON()">ファイルに<ruby>書<rt>か</rt></ruby>き<ruby>出<rt>だ</rt></ruby>し</button>
+                <button class="btn-backup import" onclick="triggerImportJSON()">ファイルから<ruby>読<rt>よ</rt></ruby>み<ruby>込<rt>こ</rt></ruby>み</button>
+                <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="handleImportJSON(event)">
+              </div>
             </div>
           </div>
         </div>
