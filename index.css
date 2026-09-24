@@ -752,33 +752,38 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 6px;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 /* ALL White Text Stage Titles with Font-up Number Part */
 .stage-title {
   display: flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 1px;
   color: #ffffff !important;
   text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
   line-height: 1;
+  white-space: nowrap;
 }
 
 .big-num {
-  font-size: 62px;
+  font-size: 46px;
   font-weight: 900;
   color: #ffffff !important;
   line-height: 0.95;
-  letter-spacing: -2px;
+  letter-spacing: -1.5px;
+  white-space: nowrap;
 }
 
 .small-sub {
-  font-size: 26px;
+  font-size: 19px;
   font-weight: 900;
   color: #ffffff !important;
   letter-spacing: -0.5px;
   align-self: flex-end;
-  padding-bottom: 2px;
+  padding-bottom: 1px;
+  white-space: nowrap;
 }
 
 /* Coin Reward Box - Layout Matching Reference Image */
@@ -788,37 +793,40 @@ body {
   align-items: flex-end;
   position: relative;
   z-index: 2;
+  white-space: nowrap;
 }
 
 .coin-label-text {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 900;
   color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   line-height: 1.1;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
 .coin-val-row {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
 }
 
 .big-coin-icon {
-  font-size: 28px;
+  font-size: 22px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
 }
 
 .coin-x {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 900;
 }
 
 .coin-num {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 900;
 }
 
