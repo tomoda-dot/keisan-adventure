@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>たしざん・ひきざんマスター けいさんアドベンチャー</title>
+  <meta name="description" content="小学生向けの楽しく学べる足し算・引き算計算学習ゲーム！たしざん・ひきざんマスター けいさんアドベンチャー">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div id="app-container" class="app-container">
+    
+    <!-- Top Global Header -->
+    <header class="global-header">
+      <div class="header-left">
+        <label class="lang-toggle" title="言語切替">
+          <input type="checkbox" id="lang-checkbox" onchange="toggleLanguage()">
+          <span class="lang-slider">
+            <span class="lang-ja">日本語</span>
+            <span class="lang-en">English</span>
+          </span>
+        </label>
+        <button id="btn-back" class="btn-icon header-btn-back hidden" onclick="goBack()" title="もどる">
+          <span class="icon">↩</span><span class="lbl">もどる</span>
+        </button>
+      </div>
+
+      <div class="header-center" id="header-title-container">
+        <!-- Dynamic screen header title if needed -->
+      </div>
+
+      <div class="header-right">
+        <button class="btn-icon" onclick="openScreen('records')" title="記録">📋</button>
+        <button class="btn-icon" onclick="openScreen('settings')" title="設定">⚙️</button>
+        <button id="btn-bgm" class="btn-icon" onclick="toggleBGM()" title="BGM切替">🎵</button>
+        <button class="btn-icon" onclick="toggleFullscreen()" title="全画面表示">⛶</button>
+      </div>
+    </header>
+
+    <!-- Main Dynamic Content Views -->
+    <main class="main-viewport">
+
+      <!-- ================= 1. TITLE SCREEN ================= -->
+      <section id="screen-title" class="screen-view active">
+        <div class="title-hero">
+          <div class="title-sub">たしざん・ひきざんマスター</div>
+          <h1 class="title-main">けいさん<br class="mobile-only">アドベンチャー</h1>
+          <div class="version-badge">Ver 3.1.1</div>
+        </div>
+
+        <div class="title-mode-buttons">
+          <button class="btn-title-mode mode-practice" onclick="openPracticeSelect('add')">
+            <div class="mode-label">たしざん・ひきざん<br>れんしゅう</div>
+            <div class="mode-badge badge-lv">
+              <span class="badge-icon">LV</span>
+              <span class="badge-x">×</span>
+              <span id="title-lv-count">0</span>
+            </div>
+          </button>
+
+          <button class="btn-title-mode mode-challenge" onclick="openChallengeSelect()">
+            <div class="mode-label">けいさん<br>チャレンジ</div>
+            <div class="mode-badge badge-star">
+              <span class="badge-icon">★</span>
+              <span class="badge-x">×</span>
+              <span id="title-star-count">0</span>
+            </div>
+          </button>
+        </div>
+
+        <div class="title-currencies">
+          <div class="currency-item item-coin">
+            <span class="c-icon">🪙</span>
+            <span class="c-x">×</span>
+            <span id="title-coin-count">100</span>
+          </div>
+          <div class="currency-item item-gem">
+            <span class="c-icon">💎</span>
+            <span class="c-x">×</span>
+            <span id="title-gem-count">0</span>
+          </div>
+        </div>
+
+        <div class="title-footer-msg">
+          あなたは <span id="player-seq-num">89,505,431</span> 人目のプレーヤーです。
+        </div>
+
+        <footer class="copyright-footer">
+          ©2023-2026 学校教育情報処理研究会 / School Education Information Processing Study Group
+        </footer>
+      </section>
+
+      <!-- ================= 2. PRACTICE SELECT SCREEN ================= -->
+      <section id="screen-practice-select" class="screen-view">
+        <div class="screen-sub-header">
+          <div class="tab-mode-selector">
+            <button id="tab-add" class="tab-btn active" onclick="switchPracticeTab('add')">➕ たしざん れんしゅう</button>
+            <button id="tab-sub" class="tab-btn" onclick="switchPracticeTab('sub')">➖ ひきざん れんしゅう</button>
+          </div>
+          <div class="header-badges">
+            <span class="h-badge badge-lv">LV × <span id="prac-lv-val">0</span></span>
+            <span class="h-badge badge-star">★ × <span id="prac-star-val">0</span></span>
+          </div>
+        </div>
+
+        <div id="practice-grid-container" class="stage-grid-container">
+          <!-- Dynamic stage cards rendered here -->
+        </div>
+
+        <div class="bottom-currency-bar">
+          <span class="bar-item">🪙 × <span id="prac-coin-val">100</span></span>
+          <span class="bar-item">💎 × <span id="prac-gem-val">0</span></span>
+        </div>
+      </section>
+
+      <!-- ================= 3. CHALLENGE SELECT SCREEN ================= -->
+      <section id="screen-challenge-select" class="screen-view">
+        <div class="screen-sub-header">
+          <h2 class="section-title">けいさんチャレンジ</h2>
+          <div class="header-badges">
+            <span class="h-badge badge-lv">LV × <span id="chal-lv-val">0</span></span>
+            <span class="h-badge badge-star">★ × <span id="chal-star-val">0</span></span>
+          </div>
+        </div>
+
+        <div class="challenge-categories-grid">
+          <div class="challenge-card" onclick="startChallenge('normal')">
+            <div class="chal-icon">⚡</div>
+            <div class="chal-info">
+              <h3>ノーマルけいさん</h3>
+              <p>たしざんとひきざんのスピード勝負！</p>
+            </div>
+            <div class="chal-badge">ランク 1〜5</div>
+          </div>
+
+          <div class="challenge-card" onclick="startChallenge('listen')">
+            <div class="chal-icon">🎧</div>
+            <div class="chal-info">
+              <h3>聞いてけいさん</h3>
+              <p>音声で流れる問題を耳で聞いて計算しよう！</p>
+            </div>
+            <div class="chal-badge">ランク 1〜5</div>
+          </div>
+
+          <div class="challenge-card" onclick="startChallenge('block')">
+            <div class="chal-icon">🧱</div>
+            <div class="chal-info">
+              <h3>ブロック図けいさん</h3>
+              <p>視覚的なブロックを数えて答えを導こう！</p>
+            </div>
+            <div class="chal-badge">ランク 1〜5</div>
+          </div>
+
+          <div class="challenge-card" onclick="startChallenge('mushikui')">
+            <div class="chal-icon">🐛</div>
+            <div class="chal-info">
+              <h3>虫食いけいさん</h3>
+              <p>「? ＋ 3 ＝ 8」の穴埋め問題を解こう！</p>
+            </div>
+            <div class="chal-badge">ランク 1〜5</div>
+          </div>
+
+          <div class="challenge-card" onclick="startChallenge('reverse')">
+            <div class="chal-icon">🔄</div>
+            <div class="chal-info">
+              <h3>答えから逆算</h3>
+              <p>答えが「10」になる式をみつけよう！</p>
+            </div>
+            <div class="chal-badge">ランク 1〜5</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. GAME PLAY SCREEN ================= -->
+      <section id="screen-gameplay" class="screen-view">
+        <div class="gameplay-layout" id="gameplay-layout-box">
+          
+          <!-- Left side: Question & Visual area -->
+          <div class="gameplay-left">
+            <div class="gameplay-status-bar">
+              <div class="gameplay-title-tag" id="gameplay-stage-title">1のだん のぼり</div>
+              <div class="gameplay-progress">
+                <span id="q-curr">1</span> / <span id="q-total">10</span>
+              </div>
+            </div>
+
+            <!-- Block Visual Helper (if enabled or block challenge) -->
+            <div id="visual-blocks-area" class="visual-blocks-area hidden">
+              <!-- Rendered blocks -->
+            </div>
+
+            <!-- Question Formula -->
+            <div class="formula-box">
+              <span id="formula-num1" class="formula-part">1</span>
+              <span id="formula-op" class="formula-part">＋</span>
+              <span id="formula-num2" class="formula-part">1</span>
+              <span class="formula-part">＝</span>
+              <div id="formula-answer-box" class="formula-ans-box"></div>
+            </div>
+
+            <div id="gameplay-feedback-msg" class="feedback-msg"></div>
+          </div>
+
+          <!-- Right side: LCD Display & Calculator Keypad -->
+          <div class="gameplay-right" id="keypad-panel">
+            <div class="calculator-unit">
+              <!-- LCD Screen -->
+              <div class="lcd-screen">
+                <div id="lcd-value" class="lcd-value"></div>
+              </div>
+
+              <!-- Life Hearts -->
+              <div class="hearts-row" id="hearts-container">
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+              </div>
+
+              <!-- Keypad Matrix -->
+              <div class="keypad-grid" id="keypad-grid">
+                <button class="key-btn" onclick="pressKey('7')">7</button>
+                <button class="key-btn" onclick="pressKey('8')">8</button>
+                <button class="key-btn" onclick="pressKey('9')">9</button>
+                
+                <button class="key-btn" onclick="pressKey('4')">4</button>
+                <button class="key-btn" onclick="pressKey('5')">5</button>
+                <button class="key-btn" onclick="pressKey('6')">6</button>
+
+                <button class="key-btn" onclick="pressKey('1')">1</button>
+                <button class="key-btn" onclick="pressKey('2')">2</button>
+                <button class="key-btn" onclick="pressKey('3')">3</button>
+
+                <button class="key-btn key-zero" onclick="pressKey('0')">0</button>
+                <button class="key-btn key-clear" onclick="pressKey('C')">C</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= 5. SETTINGS SCREEN ================= -->
+      <section id="screen-settings" class="screen-view">
+        <div class="modal-card modal-settings">
+          <div class="modal-header">
+            <span class="modal-title-badge">せってい</span>
+          </div>
+
+          <div class="settings-content-grid">
+            <!-- Left Side: Calculation Speech / Reading -->
+            <div class="settings-section">
+              <h3 class="settings-sec-title">◆ たしざん・ひきざんのよみかた</h3>
+              <div class="settings-row">
+                <span class="setting-expr">1 ＋ 1</span>
+                <div class="btn-group-toggle">
+                  <button class="toggle-opt active" id="read-std" onclick="setReadingMode('std')">いちたすいち</button>
+                  <button class="toggle-opt" id="read-short" onclick="setReadingMode('short')">1 たす 1</button>
+                </div>
+              </div>
+              <div class="settings-row">
+                <span class="setting-expr">5 － 2</span>
+                <div class="btn-group-toggle">
+                  <button class="toggle-opt active" id="read-sub-std" onclick="setReadingMode('std')">ごひくに</button>
+                  <button class="toggle-opt" id="read-sub-short" onclick="setReadingMode('short')">5 ひく 2</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: Display & Assistance -->
+            <div class="settings-section">
+              <h3 class="settings-sec-title">◆ ひょうじ・ユーザーほじょ</h3>
+              <div class="settings-row">
+                <span class="setting-expr">1 → 10</span>
+                <div class="btn-group-toggle">
+                  <button class="toggle-opt active" id="opt-up-nobori" onclick="setOrderName('nobori')">のぼり</button>
+                  <button class="toggle-opt" id="opt-up-agari" onclick="setOrderName('agari')">あがり</button>
+                </div>
+              </div>
+              <div class="settings-row">
+                <span class="setting-expr">10 → 1</span>
+                <div class="btn-group-toggle">
+                  <button class="toggle-opt active" id="opt-down-kudari" onclick="setOrderName('kudari')">くだり</button>
+                  <button class="toggle-opt" id="opt-down-sagari" onclick="setOrderName('sagari')">さがり</button>
+                </div>
+              </div>
+              <div class="settings-row">
+                <span class="setting-expr">? → ?</span>
+                <div class="btn-group-toggle">
+                  <button class="toggle-opt active" id="opt-rnd-bara" onclick="setOrderName('bara')">ばらばら</button>
+                  <button class="toggle-opt" id="opt-rnd-rand" onclick="setOrderName('rand')">ランダム</button>
+                </div>
+              </div>
+
+              <div class="checkbox-list">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="chk-show-ms" onchange="saveSettingsFromUI()">
+                  <span class="checkmark"></span>
+                  <span class="cb-text">タイムを小数点以下まで表示する。</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="chk-auto-read" onchange="saveSettingsFromUI()">
+                  <span class="checkmark"></span>
+                  <span class="cb-text">「聞いて計算」を自動読み上げする。</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="chk-left-hand" onchange="saveSettingsFromUI()">
+                  <span class="checkmark"></span>
+                  <span class="cb-text">テンキーを左に表示する。（左利き）</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="chk-reverse-keys" onchange="saveSettingsFromUI()">
+                  <span class="checkmark"></span>
+                  <span class="cb-text">キーのならびを反対にする。</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Data Backup -->
+          <div class="settings-backup-section">
+            <h3 class="settings-sec-title">◆ データのバックアップ</h3>
+            <p class="backup-desc">ファイルからデータの復元や引継ぎができます。</p>
+            <div class="backup-btn-group">
+              <button class="btn-backup export" onclick="exportDataJSON()">ファイルに書き出し</button>
+              <button class="btn-backup import" onclick="triggerImportJSON()">ファイルから読み込み</button>
+              <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="handleImportJSON(event)">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. RECORDS SCREEN ================= -->
+      <section id="screen-records" class="screen-view">
+        <div class="records-container">
+          <div class="records-header-row">
+            <div class="player-name-box">
+              <span class="name-label">名前：</span>
+              <input type="text" id="player-name-input" value="プレーヤー" onchange="savePlayerName(this.value)">
+              <span class="edit-icon">✏️</span>
+            </div>
+
+            <div class="records-badges-row">
+              <span class="h-badge badge-lv">LV × <span id="rec-lv-val">0</span></span>
+              <span class="h-badge badge-star">★ × <span id="rec-star-val">0</span></span>
+              <span class="bar-item">🪙 × <span id="rec-coin-val">100</span></span>
+              <span class="bar-item">💎 × <span id="rec-gem-val">0</span></span>
+            </div>
+          </div>
+
+          <div class="records-summary-row">
+            <div class="sum-card">
+              <span class="sum-lbl">総プレイ数：</span>
+              <span class="sum-val" id="rec-total-plays">0</span>
+            </div>
+            <div class="sum-card">
+              <span class="sum-lbl">計算した数：</span>
+              <span class="sum-val" id="rec-total-solved">0</span>
+            </div>
+            <div class="sum-card">
+              <span class="sum-lbl">獲得コイン数：</span>
+              <span class="sum-val" id="rec-total-coins">0</span>
+            </div>
+            <div class="sum-card">
+              <span class="sum-lbl">獲得宝石数：</span>
+              <span class="sum-val" id="rec-total-gems">0</span>
+            </div>
+          </div>
+
+          <div class="records-tables-flex">
+            <!-- Left Matrix: Practice Records -->
+            <div class="records-table-wrapper">
+              <h3 class="table-sec-title title-red">◆ たしざん・ひきざん れんしゅう</h3>
+              <div class="records-scroll-table">
+                <table class="rec-table">
+                  <thead>
+                    <tr>
+                      <th rowspan="2">だん / コース</th>
+                      <th colspan="3">のぼり</th>
+                      <th colspan="3">くだり</th>
+                      <th colspan="3">ばらばら</th>
+                    </tr>
+                    <tr>
+                      <th>レベル</th><th>ベストタイム</th><th>クリア数</th>
+                      <th>レベル</th><th>ベストタイム</th><th>クリア数</th>
+                      <th>レベル</th><th>ベストタイム</th><th>クリア数</th>
+                    </tr>
+                  </thead>
+                  <tbody id="records-practice-tbody">
+                    <!-- Rendered by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right Matrix: Challenge Records -->
+            <div class="records-table-wrapper">
+              <h3 class="table-sec-title title-blue">◆ けいさんチャレンジ</h3>
+              <div class="records-scroll-table">
+                <table class="rec-table">
+                  <thead>
+                    <tr>
+                      <th>コース</th>
+                      <th>ひょうか</th>
+                      <th>ベストタイム</th>
+                      <th>クリア数</th>
+                    </tr>
+                  </thead>
+                  <tbody id="records-challenge-tbody">
+                    <!-- Rendered by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Clear / Result Modal Popup -->
+  <div id="modal-result-overlay" class="modal-overlay hidden">
+    <div class="modal-card modal-result">
+      <div class="result-icon-banner" id="result-icon-banner">🎉</div>
+      <h2 id="result-title" class="result-title">ステージクリア！</h2>
+      
+      <div class="result-stats-box">
+        <div class="res-stat-row">
+          <span>クリアタイム:</span>
+          <span id="result-time-val" class="res-highlight">00:12.34</span>
+        </div>
+        <div class="res-stat-row">
+          <span>せいかい数:</span>
+          <span id="result-correct-val">10 / 10</span>
+        </div>
+        <div class="res-stat-row">
+          <span>かくとくコイン:</span>
+          <span id="result-coin-val" class="res-gold">🪙 +50</span>
+        </div>
+      </div>
+
+      <div class="result-buttons">
+        <button class="btn-res btn-home" onclick="closeResultModal(); openScreen('title');">タイトルへ</button>
+        <button class="btn-res btn-retry" onclick="closeResultModal(); retryCurrentStage();">もういちど</button>
+        <button class="btn-res btn-next" onclick="closeResultModal(); nextStage();">つぎへ</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
