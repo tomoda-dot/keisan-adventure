@@ -542,30 +542,105 @@ body {
   flex-shrink: 0;
 }
 
-.tab-mode-selector {
+.practice-title-wrapper {
   display: flex;
-  background: #eceff1;
-  padding: 4px;
-  border-radius: 18px;
-  gap: 6px;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-.tab-btn {
-  padding: 10px 24px;
-  border-radius: 14px;
-  border: none;
-  background: transparent;
-  font-size: 18px;
+.practice-title-banner {
+  font-family: var(--font-family);
+  font-size: 40px;
   font-weight: 900;
-  color: #607d8b;
-  cursor: pointer;
-  transition: all 0.2s;
+  color: #ffffff;
+  letter-spacing: 2px;
+  margin: 0;
+  line-height: 1.1;
+  transition: text-shadow 0.3s ease;
 }
 
-.tab-btn.active {
-  background: #ffffff;
-  color: var(--red-primary);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+.practice-title-banner.mode-add {
+  text-shadow: 
+    -3px -3px 0 #b71c1c, 3px -3px 0 #b71c1c, -3px 3px 0 #b71c1c, 3px 3px 0 #b71c1c,
+    -5px 0 0 #e53935, 5px 0 0 #e53935, 0 -5px 0 #e53935, 0 5px 0 #e53935,
+    0 6px 12px rgba(229, 57, 53, 0.4);
+}
+
+.practice-title-banner.mode-sub {
+  text-shadow: 
+    -3px -3px 0 #0d47a1, 3px -3px 0 #0d47a1, -3px 3px 0 #0d47a1, 3px 3px 0 #0d47a1,
+    -5px 0 0 #1976d2, 5px 0 0 #1976d2, 0 -5px 0 #1976d2, 0 5px 0 #1976d2,
+    0 6px 12px rgba(25, 118, 210, 0.4);
+}
+
+.btn-title-arrow {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  background: linear-gradient(135deg, #ff5252, #e53935);
+  box-shadow: 0 4px 10px rgba(229, 57, 53, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease;
+  padding: 0 0 0 2px;
+}
+
+.btn-title-arrow:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 14px rgba(229, 57, 53, 0.5);
+}
+
+.btn-title-arrow:active {
+  transform: scale(0.95);
+}
+
+.btn-title-arrow.blue-arrow {
+  background: linear-gradient(135deg, #42a5f5, #1976d2);
+  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  padding: 0 2px 0 0;
+}
+
+/* Slide Animations */
+@keyframes slideOutLeft {
+  0% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-100vw); opacity: 0; }
+}
+
+@keyframes slideInRight {
+  0% { transform: translateX(100vw); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  0% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(100vw); opacity: 0; }
+}
+
+@keyframes slideInLeft {
+  0% { transform: translateX(-100vw); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.anim-slide-out-left {
+  animation: slideOutLeft 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.anim-slide-in-right {
+  animation: slideInRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.anim-slide-out-right {
+  animation: slideOutRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.anim-slide-in-left {
+  animation: slideInLeft 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .header-badges {
@@ -1606,8 +1681,9 @@ body.pink-diamond-bg-mode {
 }
 
 .modal-overlay.hidden {
-  opacity: 0;
-  pointer-events: none;
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .modal-result {
@@ -1674,6 +1750,43 @@ body.pink-diamond-bg-mode {
 .btn-retry { background: #ff9800; }
 .btn-next { background: #43a047; }
 
+/* 3 2 1 Countdown Start Overlay Styles */
+.countdown-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.countdown-overlay.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.countdown-text {
+  font-size: 140px;
+  font-weight: 900;
+  color: #ff9800;
+  text-shadow: 
+    0 8px 0 #b26a00,
+    0 0 24px rgba(255, 152, 0, 0.9),
+    0 0 40px #ffffff;
+  -webkit-text-stroke: 4px #ffffff;
+}
+
+@keyframes countPop {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 .hidden {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

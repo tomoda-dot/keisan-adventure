@@ -372,18 +372,83 @@ function toggleFullscreen() {
 
 /* ================= PRACTICE SCREEN LOGIC ================= */
 let activePracticeTab = 'add'; // 'add' | 'sub'
+let isSlidingMode = false;
 
 function openPracticeSelect(type = 'add') {
   activePracticeTab = type;
-  switchPracticeTab(type);
+  updatePracticeTitleBanner();
+  renderPracticeStageGrid();
   openScreen('practice-select');
 }
 
 function switchPracticeTab(type) {
   activePracticeTab = type;
-  document.getElementById('tab-add').classList.toggle('active', type === 'add');
-  document.getElementById('tab-sub').classList.toggle('active', type === 'sub');
+  updatePracticeTitleBanner();
   renderPracticeStageGrid();
+}
+
+function updatePracticeTitleBanner() {
+  const banner = document.getElementById('practice-title-banner');
+  const btnArrow = document.getElementById('btn-arrow-mode');
+  const isAdd = activePracticeTab === 'add';
+
+  if (banner) {
+    banner.innerText = isAdd ? 'たしざん れんしゅう' : 'ひきざん れんしゅう';
+    banner.className = `practice-title-banner ${isAdd ? 'mode-add' : 'mode-sub'}`;
+  }
+  if (btnArrow) {
+    btnArrow.innerText = isAdd ? '▶' : '◀';
+    btnArrow.className = `btn-title-arrow ${isAdd ? 'red-arrow' : 'blue-arrow'}`;
+    btnArrow.title = isAdd ? 'ひきざん れんしゅう へ' : 'たしざん れんしゅう へ';
+  }
+}
+
+function togglePracticeModeSlide() {
+  if (isSlidingMode) return;
+  isSlidingMode = true;
+
+  const titleWrapper = document.querySelector('.practice-title-wrapper');
+  const gridContainer = document.getElementById('practice-grid-container');
+
+  const goingToSub = (activePracticeTab === 'add');
+  const targetMode = goingToSub ? 'sub' : 'add';
+
+  const outAnimClass = goingToSub ? 'anim-slide-out-left' : 'anim-slide-out-right';
+  const inAnimClass = goingToSub ? 'anim-slide-in-right' : 'anim-slide-in-left';
+
+  if (typeof audio !== 'undefined' && audio.playKey) {
+    audio.playKey();
+  }
+
+  if (titleWrapper) {
+    titleWrapper.classList.remove('anim-slide-out-left', 'anim-slide-out-right', 'anim-slide-in-left', 'anim-slide-in-right');
+    titleWrapper.classList.add(outAnimClass);
+  }
+  if (gridContainer) {
+    gridContainer.classList.remove('anim-slide-out-left', 'anim-slide-out-right', 'anim-slide-in-left', 'anim-slide-in-right');
+    gridContainer.classList.add(outAnimClass);
+  }
+
+  setTimeout(() => {
+    activePracticeTab = targetMode;
+    updatePracticeTitleBanner();
+    renderPracticeStageGrid();
+
+    if (titleWrapper) {
+      titleWrapper.classList.remove(outAnimClass);
+      titleWrapper.classList.add(inAnimClass);
+    }
+    if (gridContainer) {
+      gridContainer.classList.remove(outAnimClass);
+      gridContainer.classList.add(inAnimClass);
+    }
+
+    setTimeout(() => {
+      if (titleWrapper) titleWrapper.classList.remove(inAnimClass);
+      if (gridContainer) gridContainer.classList.remove(inAnimClass);
+      isSlidingMode = false;
+    }, 250);
+  }, 250);
 }
 
 function renderPracticeStageGrid() {
