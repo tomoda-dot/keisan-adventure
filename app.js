@@ -255,8 +255,20 @@ function updateHeaderStats() {
   document.getElementById('rec-total-gems').innerText = gameState.totalGemsEarned;
 }
 
+let currentScreenId = 'title';
+let screenHistory = ['title'];
+
 // Navigation & Screen Management with Fade-out & Fade-in Transitions
-function openScreen(screenId) {
+function openScreen(screenId, isBack = false) {
+  if (screenId === 'title') {
+    screenHistory = ['title'];
+  } else if (!isBack) {
+    if (screenHistory[screenHistory.length - 1] !== screenId) {
+      screenHistory.push(screenId);
+    }
+  }
+  currentScreenId = screenId;
+
   const currentActive = document.querySelector('.screen-view.active');
   if (currentActive) {
     currentActive.style.opacity = '0';
@@ -274,9 +286,9 @@ function openScreen(screenId) {
 
     const backBtn = document.getElementById('btn-back');
     if (screenId === 'title') {
-      backBtn.classList.add('hidden');
+      backBtn?.classList.add('hidden');
     } else {
-      backBtn.classList.remove('hidden');
+      backBtn?.classList.remove('hidden');
     }
 
     const header = document.querySelector('.global-header');
@@ -308,7 +320,13 @@ function openScreen(screenId) {
 }
 
 function goBack() {
-  openScreen('title');
+  if (screenHistory.length > 1) {
+    screenHistory.pop();
+    const prev = screenHistory[screenHistory.length - 1];
+    openScreen(prev, true);
+  } else {
+    openScreen('title');
+  }
 }
 
 function toggleLanguage() {
@@ -1016,7 +1034,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.3.1';
+const APP_VERSION = 'Ver 3.3.2';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
