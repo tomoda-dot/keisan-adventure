@@ -834,7 +834,7 @@ function handleImportJSON(e) {
 const APP_VERSION = 'Ver 3.1.1';
 
 function updateVisitCounter() {
-  const BASE_VISITS = 89505431;
+  const BASE_VISITS = 0;
   let localVisits = parseInt(localStorage.getItem('KEISAN_VISIT_COUNT') || '0', 10);
   localVisits += 1;
   localStorage.setItem('KEISAN_VISIT_COUNT', localVisits);
