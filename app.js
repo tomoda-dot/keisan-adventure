@@ -296,23 +296,29 @@ function openScreen(screenId, isBack = false) {
     const setTitle = document.getElementById('header-title-settings');
 
     if (screenId === 'records') {
-      document.body.classList.remove('settings-bg-mode');
+      document.body.classList.remove('settings-bg-mode', 'pink-diamond-bg-mode');
       header?.classList.add('records-mode');
       header?.classList.remove('settings-mode');
       recTitle?.classList.remove('hidden');
       setTitle?.classList.add('hidden');
       renderRecordsScreen();
     } else if (screenId === 'settings') {
+      document.body.classList.remove('pink-diamond-bg-mode');
       document.body.classList.add('settings-bg-mode');
       header?.classList.remove('records-mode');
       header?.classList.add('settings-mode');
       recTitle?.classList.add('hidden');
       setTitle?.classList.remove('hidden');
       syncSettingsUI();
-    } else {
+    } else if (screenId === 'practice-select' || screenId === 'challenge-select') {
       document.body.classList.remove('settings-bg-mode');
-      header?.classList.remove('records-mode');
-      header?.classList.remove('settings-mode');
+      document.body.classList.add('pink-diamond-bg-mode');
+      header?.classList.remove('records-mode', 'settings-mode');
+      recTitle?.classList.add('hidden');
+      setTitle?.classList.add('hidden');
+    } else {
+      document.body.classList.remove('settings-bg-mode', 'pink-diamond-bg-mode');
+      header?.classList.remove('records-mode', 'settings-mode');
       recTitle?.classList.add('hidden');
       setTitle?.classList.add('hidden');
     }
@@ -1034,7 +1040,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.3.2';
+const APP_VERSION = 'Ver 3.3.3';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
