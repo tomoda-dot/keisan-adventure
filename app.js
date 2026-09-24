@@ -732,10 +732,28 @@ function closeResultModal() {
 
 /* ================= SETTINGS & RECORDS MANAGEMENT ================= */
 function syncSettingsUI() {
-  document.getElementById('chk-show-ms').checked = gameState.settings.showMs;
-  document.getElementById('chk-auto-read').checked = gameState.settings.autoRead;
-  document.getElementById('chk-left-hand').checked = gameState.settings.leftHand;
-  document.getElementById('chk-reverse-keys').checked = gameState.settings.reverseKeys;
+  document.getElementById('chk-show-ms').checked = gameState.settings.showMs || false;
+  document.getElementById('chk-auto-read').checked = gameState.settings.autoRead !== false;
+  document.getElementById('chk-left-hand').checked = gameState.settings.leftHand || false;
+  document.getElementById('chk-reverse-keys').checked = gameState.settings.reverseKeys || false;
+
+  const mode = gameState.settings.readingMode || 'std';
+  document.getElementById('read-std')?.classList.toggle('active', mode === 'std');
+  document.getElementById('read-short')?.classList.toggle('active', mode === 'short');
+  document.getElementById('read-sub-std')?.classList.toggle('active', mode === 'std');
+  document.getElementById('read-sub-short')?.classList.toggle('active', mode === 'short');
+
+  const up = gameState.settings.upOrderName || 'nobori';
+  document.getElementById('opt-up-nobori')?.classList.toggle('active', up === 'nobori');
+  document.getElementById('opt-up-agari')?.classList.toggle('active', up === 'agari');
+
+  const down = gameState.settings.downOrderName || 'kudari';
+  document.getElementById('opt-down-kudari')?.classList.toggle('active', down === 'kudari');
+  document.getElementById('opt-down-sagari')?.classList.toggle('active', down === 'sagari');
+
+  const rand = gameState.settings.randOrderName || 'bara';
+  document.getElementById('opt-rnd-bara')?.classList.toggle('active', rand === 'bara');
+  document.getElementById('opt-rnd-rand')?.classList.toggle('active', rand === 'rand');
 }
 
 function saveSettingsFromUI() {
@@ -748,15 +766,29 @@ function saveSettingsFromUI() {
 
 function setReadingMode(mode) {
   gameState.settings.readingMode = mode;
-  document.getElementById('read-std').classList.toggle('active', mode === 'std');
-  document.getElementById('read-short').classList.toggle('active', mode === 'short');
+  document.getElementById('read-std')?.classList.toggle('active', mode === 'std');
+  document.getElementById('read-short')?.classList.toggle('active', mode === 'short');
+  document.getElementById('read-sub-std')?.classList.toggle('active', mode === 'std');
+  document.getElementById('read-sub-short')?.classList.toggle('active', mode === 'short');
   saveData();
 }
 
 function setOrderName(type) {
-  if (['nobori', 'agari'].includes(type)) gameState.settings.upOrderName = type;
-  if (['kudari', 'sagari'].includes(type)) gameState.settings.downOrderName = type;
-  if (['bara', 'rand'].includes(type)) gameState.settings.randOrderName = type;
+  if (['nobori', 'agari'].includes(type)) {
+    gameState.settings.upOrderName = type;
+    document.getElementById('opt-up-nobori')?.classList.toggle('active', type === 'nobori');
+    document.getElementById('opt-up-agari')?.classList.toggle('active', type === 'agari');
+  }
+  if (['kudari', 'sagari'].includes(type)) {
+    gameState.settings.downOrderName = type;
+    document.getElementById('opt-down-kudari')?.classList.toggle('active', type === 'kudari');
+    document.getElementById('opt-down-sagari')?.classList.toggle('active', type === 'sagari');
+  }
+  if (['bara', 'rand'].includes(type)) {
+    gameState.settings.randOrderName = type;
+    document.getElementById('opt-rnd-bara')?.classList.toggle('active', type === 'bara');
+    document.getElementById('opt-rnd-rand')?.classList.toggle('active', type === 'rand');
+  }
   saveData();
 }
 
@@ -857,7 +889,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.1.3';
+const APP_VERSION = 'Ver 3.1.4';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
