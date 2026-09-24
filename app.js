@@ -1,6 +1,5 @@
 /* app.js - たしざん・ひきざんマスター けいさんアドベンチャー */
 
-// Game State & Persistence Data Schema
 const SAVE_KEY = 'KEISAN_ADVENTURE_SAVE_V1';
 
 const defaultState = {
@@ -14,13 +13,12 @@ const defaultState = {
   totalCoinsEarned: 0,
   totalGemsEarned: 0,
   
-  // Settings
   settings: {
-    lang: 'ja', // 'ja' | 'en'
-    readingMode: 'std', // 'std' (いちたすいち) | 'short' (1たす1)
-    upOrderName: 'nobori', // 'nobori' | 'agari'
-    downOrderName: 'kudari', // 'kudari' | 'sagari'
-    randOrderName: 'bara', // 'bara' | 'rand'
+    lang: 'ja',
+    readingMode: 'std',
+    upOrderName: 'nobori',
+    downOrderName: 'kudari',
+    randOrderName: 'bara',
     showMs: false,
     autoRead: true,
     leftHand: false,
@@ -29,20 +27,17 @@ const defaultState = {
     sfxOn: true
   },
   
-  // Records Matrix: { [stageId]: { nobori: { level, bestTime, clears, orb1, orb2, orb3 }, ... } }
   records: {},
-  // Challenge Records: { [chalType]: { rank1: { grade, bestTime, clears }, ... } }
   challengeRecords: {}
 };
 
 let gameState = JSON.parse(JSON.stringify(defaultState));
 
-// Current Session Game State
 let currentSession = {
-  mode: 'practice', // 'practice' | 'challenge'
-  type: 'add', // 'add' | 'sub'
-  stageId: 1, // 1..10
-  order: 'nobori', // 'nobori' | 'kudari' | 'bara'
+  mode: 'practice',
+  type: 'add',
+  stageId: 1,
+  order: 'nobori',
   chalType: 'normal',
   questions: [],
   qIndex: 0,
@@ -52,15 +47,13 @@ let currentSession = {
   startTime: 0,
   endTime: 0,
   typedVal: '',
-  timerInterval: null
+  isCountingDown: false
 };
 
-// Web Audio API Synthesizer for SFX & BGM
+// Web Audio API Synthesizer
 class SoundEngine {
   constructor() {
     this.ctx = null;
-    this.bgmTimer = null;
-    this.bgmPlaying = false;
   }
 
   init() {
@@ -73,27 +66,29 @@ class SoundEngine {
     }
   }
 
-  playKey() {
+  playBeep(freq = 600, duration = 0.08) {
     if (!gameState.settings.sfxOn) return;
     this.init();
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.05);
-    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start();
-    osc.stop(this.ctx.currentTime + 0.05);
+    osc.stop(this.ctx.currentTime + duration);
+  }
+
+  playKey() {
+    this.playBeep(700, 0.05);
   }
 
   playCorrect() {
     if (!gameState.settings.sfxOn) return;
     this.init();
     const now = this.ctx.currentTime;
-    // Chime C5 -> G5
     [523.25, 783.99].forEach((freq, i) => {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -125,11 +120,29 @@ class SoundEngine {
     osc.stop(now + 0.25);
   }
 
+  playStartTone() {
+    if (!gameState.settings.sfxOn) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + i * 0.06);
+      gain.gain.setValueAtTime(0.3, now + i * 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.06 + 0.25);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.06);
+      osc.stop(now + i * 0.06 + 0.25);
+    });
+  }
+
   playFanfare() {
     if (!gameState.settings.sfxOn) return;
     this.init();
     const now = this.ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    const notes = [523.25, 659.25, 783.99, 1046.50];
     notes.forEach((freq, i) => {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -278,7 +291,8 @@ function renderPracticeStageGrid() {
 
   for (let s = 1; s <= stageCount; s++) {
     const card = document.createElement('div');
-    card.className = 'stage-card';
+    // Vibrant Color Class color-1 .. color-10
+    card.className = `stage-card color-${s}`;
 
     let stageName = '';
     if (isAdd) {
@@ -321,6 +335,50 @@ function renderPracticeStageGrid() {
   }
 }
 
+/* ================= 3 2 1 COUNTDOWN ENGINE ================= */
+function triggerCountdown(onComplete) {
+  currentSession.isCountingDown = true;
+  const overlay = document.getElementById('countdown-overlay');
+  const textEl = document.getElementById('countdown-text');
+  overlay.classList.remove('hidden');
+
+  const steps = [
+    { text: '3', tone: 523.25 },
+    { text: '2', tone: 587.33 },
+    { text: '1', tone: 659.25 },
+    { text: 'スタート！', startTone: true }
+  ];
+
+  let stepIdx = 0;
+
+  function runStep() {
+    if (stepIdx < steps.length) {
+      const step = steps[stepIdx];
+      textEl.innerText = step.text;
+      
+      // Reset CSS animation
+      textEl.style.animation = 'none';
+      void textEl.offsetWidth; // Trigger reflow
+      textEl.style.animation = 'countPop 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+      if (step.startTone) {
+        audio.playStartTone();
+      } else {
+        audio.playBeep(step.tone, 0.15);
+      }
+
+      stepIdx++;
+      setTimeout(runStep, stepIdx === steps.length ? 750 : 750);
+    } else {
+      overlay.classList.add('hidden');
+      currentSession.isCountingDown = false;
+      if (onComplete) onComplete();
+    }
+  }
+
+  runStep();
+}
+
 /* ================= GAMEPLAY ENGINE ================= */
 function startPractice(type, stageId, order) {
   currentSession.mode = 'practice';
@@ -333,12 +391,14 @@ function startPractice(type, stageId, order) {
   currentSession.hearts = 5;
   currentSession.typedVal = '';
 
-  // Generate 10 Questions
   currentSession.questions = generateQuestions(type, stageId, order);
-  currentSession.startTime = Date.now();
 
   openScreen('gameplay');
-  renderGameplayQuestion();
+
+  triggerCountdown(() => {
+    currentSession.startTime = Date.now();
+    renderGameplayQuestion();
+  });
 }
 
 function generateQuestions(type, stageId, order) {
@@ -352,7 +412,6 @@ function generateQuestions(type, stageId, order) {
       }
       list.push({ n1: stageId, n2: 10, op: '＋', ans: stageId + 10 });
     } else {
-      // くりあがりあり (Carry sums e.g. 8+5=13)
       for (let i = 2; i <= 9; i++) {
         for (let j = 2; j <= 9; j++) {
           if (i + j > 10) list.push({ n1: i, n2: j, op: '＋', ans: i + j });
@@ -361,14 +420,12 @@ function generateQuestions(type, stageId, order) {
       list = list.sort(() => 0.5 - Math.random()).slice(0, 10);
     }
   } else {
-    // Subtraction
     if (stageId <= 9) {
       for (let i = 1; i <= 10; i++) {
         const n1 = stageId + i;
         list.push({ n1: n1, n2: stageId, op: '－', ans: i });
       }
     } else {
-      // くりさがりあり (Borrowing e.g. 14-8=6)
       for (let i = 11; i <= 18; i++) {
         for (let j = 2; j <= 9; j++) {
           if (i - j < 10 && i - j > 0) list.push({ n1: i, n2: j, op: '－', ans: i - j });
@@ -378,7 +435,6 @@ function generateQuestions(type, stageId, order) {
     }
   }
 
-  // Order sorting
   if (order === 'nobori') {
     list.sort((a, b) => a.n2 - b.n2);
   } else if (order === 'kudari') {
@@ -402,7 +458,6 @@ function renderGameplayQuestion() {
   document.getElementById('gameplay-feedback-msg').innerText = '';
   document.getElementById('gameplay-feedback-msg').className = 'feedback-msg';
 
-  // Stage Title
   const isAdd = currentSession.type === 'add';
   let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たしざん` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} を ひく` : 'くりさがりあり');
   let orderLbl = currentSession.order === 'nobori' ? 'のぼり' : (currentSession.order === 'kudari' ? 'くだり' : 'ばらばら');
@@ -418,11 +473,9 @@ function renderGameplayQuestion() {
 
   renderHearts();
 
-  // Left hand keypad layout support
   const keypad = document.getElementById('keypad-panel');
   keypad.style.order = gameState.settings.leftHand ? '-1' : '1';
 
-  // Speech TTS if auto-read is enabled
   if (gameState.settings.autoRead) {
     const opText = q.op === '＋' ? 'たす' : 'ひく';
     audio.speak(`${q.n1} ${opText} ${q.n2} は？`);
@@ -439,6 +492,8 @@ function renderHearts() {
 }
 
 function pressKey(key) {
+  if (currentSession.isCountingDown) return;
+
   audio.playKey();
 
   if (key === 'C') {
@@ -452,8 +507,8 @@ function pressKey(key) {
   document.getElementById('lcd-value').innerText = currentSession.typedVal;
   document.getElementById('formula-answer-box').innerText = currentSession.typedVal || '?';
 
-  // Auto Check when typed digits equal answer length
   const q = currentSession.questions[currentSession.qIndex];
+  if (!q) return;
   const targetLen = String(q.ans).length;
   if (currentSession.typedVal.length >= targetLen) {
     checkAnswer();
@@ -476,7 +531,7 @@ function checkAnswer() {
     setTimeout(() => {
       currentSession.qIndex++;
       renderGameplayQuestion();
-    }, 600);
+    }, 500);
   } else {
     audio.playWrong();
     fb.innerText = `❌ おしい！ (こたえ: ${q.ans})`;
@@ -492,8 +547,42 @@ function checkAnswer() {
       if (currentSession.hearts <= 0) {
         finishSession();
       }
-    }, 1000);
+    }, 900);
   }
+}
+
+/* ================= PHYSICAL KEYBOARD / NUMPAD LISTENER ================= */
+window.addEventListener('keydown', (e) => {
+  // Only handle during active gameplay when screen is gameplay
+  const activeScreen = document.querySelector('.screen-view.active');
+  if (!activeScreen || activeScreen.id !== 'screen-gameplay') return;
+  if (currentSession.isCountingDown) return;
+
+  const key = e.key;
+
+  // Number Keys '0'-'9' or Numpad '0'-'9'
+  if (key >= '0' && key <= '9') {
+    e.preventDefault();
+    highlightKeyBtn(key);
+    pressKey(key);
+  } else if (key === 'c' || key === 'C' || key === 'Backspace' || key === 'Delete') {
+    e.preventDefault();
+    highlightKeyBtn('C');
+    pressKey('C');
+  } else if (key === 'Enter') {
+    e.preventDefault();
+    checkAnswer();
+  }
+});
+
+function highlightKeyBtn(keyChar) {
+  const btns = document.querySelectorAll('.key-btn');
+  btns.forEach(btn => {
+    if (btn.innerText.trim() === keyChar) {
+      btn.classList.add('active-press');
+      setTimeout(() => btn.classList.remove('active-press'), 120);
+    }
+  });
 }
 
 /* ================= RESULT SCREEN LOGIC ================= */
@@ -502,7 +591,6 @@ function finishSession() {
   const elapsedSec = Math.round((currentSession.endTime - currentSession.startTime) / 1000);
   gameState.totalPlays++;
 
-  const isAdd = currentSession.type === 'add';
   const stageKey = `${currentSession.type}_${currentSession.stageId}`;
   if (!gameState.records[stageKey]) gameState.records[stageKey] = {};
   
@@ -562,7 +650,7 @@ function renderResultBlackboardModal(timeSec, qCount, wrongCount, coins, isNoMis
     <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
       <!-- Left side stage badge -->
       <div style="flex:1;background:rgba(255,255,255,0.15);border:3px solid #ff5252;border-radius:18px;padding:16px">
-        <div style="font-size:20px;font-weight:900;color:#ff8a80">たしざんれんしゅう</div>
+        <div style="font-size:20px;font-weight:900;color:#ff8a80">れんしゅう</div>
         <div style="font-size:16px;font-weight:800;margin-top:4px">${stageName} ${orderLbl}</div>
         <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800">
           <div><span style="color:${orb1 ? '#ff5252' : '#9e9e9e'}">🔴</span> 60秒以内にクリア</div>
@@ -632,7 +720,6 @@ function savePlayerName(val) {
 function renderRecordsScreen() {
   document.getElementById('player-name-input').value = gameState.playerName || 'プレーヤー';
 
-  // Render Practice Table
   const tbody = document.getElementById('records-practice-tbody');
   tbody.innerHTML = '';
 
