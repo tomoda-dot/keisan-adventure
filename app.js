@@ -946,7 +946,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.2.7';
+const APP_VERSION = 'Ver 3.2.8';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;

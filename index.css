@@ -1357,33 +1357,28 @@ body.settings-bg-mode {
   letter-spacing: 2px;
 }
 
-/* Records Screen Transparent Global Header */
+/* Records Screen Colored Global Header */
 .global-header.records-mode {
-  background: transparent !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
+  background: #5ebec4 !important;
+  border-bottom: 3.5px solid #4db6ac !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .header-title-records {
   font-family: var(--font-family);
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 900;
-  color: #00796b;
+  color: #ffffff;
   letter-spacing: 2px;
-  background: #ffffff;
-  padding: 4px 36px;
-  border-radius: 20px;
-  border: 3.5px solid #5ebec4;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
 }
 
 .header-title-records rt {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
-  color: #00796b;
+  color: #e0f2f1;
 }
 
 /* Records Practice Table Tab Selector */
