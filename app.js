@@ -66,8 +66,12 @@ class SoundEngine {
     }
   }
 
+  isAudioEnabled() {
+    return !!(gameState && gameState.settings && gameState.settings.bgmOn);
+  }
+
   playBeep(freq = 600, duration = 0.08) {
-    if (!gameState.settings.sfxOn) return;
+    if (!this.isAudioEnabled()) return;
     this.init();
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -82,11 +86,12 @@ class SoundEngine {
   }
 
   playKey() {
+    if (!this.isAudioEnabled()) return;
     this.playBeep(750, 0.05);
   }
 
   playCorrect() {
-    if (!gameState.settings.sfxOn) return;
+    if (!this.isAudioEnabled()) return;
     this.init();
     const now = this.ctx.currentTime;
     [523.25, 783.99].forEach((freq, i) => {
@@ -104,7 +109,7 @@ class SoundEngine {
   }
 
   playWrong() {
-    if (!gameState.settings.sfxOn) return;
+    if (!this.isAudioEnabled()) return;
     this.init();
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
@@ -121,7 +126,7 @@ class SoundEngine {
   }
 
   playStartTone() {
-    if (!gameState.settings.sfxOn) return;
+    if (!this.isAudioEnabled()) return;
     this.init();
     const now = this.ctx.currentTime;
     [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
@@ -139,7 +144,7 @@ class SoundEngine {
   }
 
   playFanfare() {
-    if (!gameState.settings.sfxOn) return;
+    if (!this.isAudioEnabled()) return;
     this.init();
     const now = this.ctx.currentTime;
     const notes = [523.25, 659.25, 783.99, 1046.50];
@@ -158,6 +163,7 @@ class SoundEngine {
   }
 
   speak(text) {
+    if (!this.isAudioEnabled()) return;
     if ('speechSynthesis' in window && gameState.settings.autoRead) {
       window.speechSynthesis.cancel();
       const uttr = new SpeechSynthesisUtterance(text);
@@ -209,6 +215,7 @@ function loadData() {
     console.error('Failed to load data:', e);
   }
   updateHeaderStats();
+  updateBgmBtnState();
   renderPracticeStageGrid();
 }
 
@@ -312,9 +319,23 @@ function toggleLanguage() {
 
 function toggleBGM() {
   gameState.settings.bgmOn = !gameState.settings.bgmOn;
-  const btn = document.getElementById('btn-bgm');
-  btn.style.opacity = gameState.settings.bgmOn ? '1' : '0.4';
+  gameState.settings.sfxOn = gameState.settings.bgmOn;
+
+  if (!gameState.settings.bgmOn && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  updateBgmBtnState();
   saveData();
+}
+
+function updateBgmBtnState() {
+  const btn = document.getElementById('btn-bgm');
+  if (btn) {
+    const soundOn = !!(gameState.settings && gameState.settings.bgmOn);
+    btn.style.opacity = soundOn ? '1' : '0.4';
+    btn.classList.toggle('muted', !soundOn);
+  }
 }
 
 function toggleFullscreen() {
@@ -995,7 +1016,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.3.0';
+const APP_VERSION = 'Ver 3.3.1';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
