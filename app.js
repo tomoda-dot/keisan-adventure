@@ -274,17 +274,25 @@ function openScreen(screenId) {
 
     const header = document.querySelector('.global-header');
     const recTitle = document.getElementById('header-title-records');
+    const setTitle = document.getElementById('header-title-settings');
 
     if (screenId === 'records') {
       header?.classList.add('records-mode');
+      header?.classList.remove('settings-mode');
       recTitle?.classList.remove('hidden');
+      setTitle?.classList.add('hidden');
       renderRecordsScreen();
+    } else if (screenId === 'settings') {
+      header?.classList.remove('records-mode');
+      header?.classList.add('settings-mode');
+      recTitle?.classList.add('hidden');
+      setTitle?.classList.remove('hidden');
+      syncSettingsUI();
     } else {
       header?.classList.remove('records-mode');
+      header?.classList.remove('settings-mode');
       recTitle?.classList.add('hidden');
-      if (screenId === 'settings') {
-        syncSettingsUI();
-      }
+      setTitle?.classList.add('hidden');
     }
   }, 150);
 }
@@ -935,7 +943,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.2.1';
+const APP_VERSION = 'Ver 3.2.2';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
