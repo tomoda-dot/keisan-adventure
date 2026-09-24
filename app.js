@@ -178,6 +178,24 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// Calculate LV level as total count of cleared red circles/orbs
+function calcTotalLevel() {
+  let count = 0;
+  if (!gameState.records) return 0;
+  Object.values(gameState.records).forEach(stage => {
+    if (stage && typeof stage === 'object') {
+      Object.values(stage).forEach(order => {
+        if (order) {
+          if (order.orb1) count++;
+          if (order.orb2) count++;
+          if (order.orb3) count++;
+        }
+      });
+    }
+  });
+  return count;
+}
+
 // Load / Save Helpers
 function loadData() {
   try {
@@ -203,6 +221,8 @@ function saveData() {
 }
 
 function updateHeaderStats() {
+  gameState.level = calcTotalLevel();
+
   document.getElementById('title-lv-count').innerText = gameState.level;
   document.getElementById('title-star-count').innerText = gameState.stars;
   document.getElementById('title-coin-count').innerText = gameState.coins;
@@ -338,10 +358,19 @@ function renderPracticeStageGrid() {
       `;
     });
 
+    const coinVal = s === 1 ? 4 : 50;
+
     card.innerHTML = `
       <div class="stage-card-header">
         <div class="stage-title">${stageName}</div>
-        <div class="stage-coin-reward">かくとくコイン 🪙 × 50</div>
+        <div class="stage-coin-reward-box">
+          <div class="coin-label-text">かくとくコイン</div>
+          <div class="coin-val-row">
+            <span class="big-coin-icon">🪙</span>
+            <span class="coin-x">×</span>
+            <span class="coin-num">${coinVal}</span>
+          </div>
+        </div>
       </div>
       <div class="stage-sub-buttons">
         ${subButtonsHtml}
@@ -618,8 +647,8 @@ function finishSession() {
   const prevRec = gameState.records[stageKey][orderKey] || { level: 0, bestTime: 999, clears: 0, orb1: false, orb2: false, orb3: false };
 
   const isNoMiss = currentSession.wrongCount === 0;
-  let coinsEarned = 25;
-  if (isNoMiss) coinsEarned *= 2; // 50 coins
+  let coinsEarned = currentSession.stageId === 1 ? 4 : 25;
+  if (isNoMiss) coinsEarned *= 2; // 8 or 50 coins
 
   const orb1 = elapsedSec <= 60;
   const orb2 = elapsedSec <= 30;
@@ -640,7 +669,6 @@ function finishSession() {
 
   gameState.coins += coinsEarned;
   gameState.totalCoinsEarned += coinsEarned;
-  gameState.level += 1;
 
   saveData();
   audio.playFanfare();
@@ -687,7 +715,7 @@ function renderResultBlackboardModal(timeSec, qCount, wrongCount, coins, isNoMis
         <hr style="border:1px dashed rgba(255,255,255,0.3);margin:8px 0">
         <div style="text-align:center;font-size:14px;color:#fff59d">かくとくコイン</div>
         <div style="text-align:center;font-size:12px;color:#a5d6a7">${isNoMiss ? 'ノーミス BONUS!' : ''}</div>
-        <div style="text-align:center;font-size:26px;font-weight:900;color:#ffeb3b">🪙 25 × ${isNoMiss ? 2 : 1} ＝ ${coins}</div>
+        <div style="text-align:center;font-size:26px;font-weight:900;color:#ffeb3b">🪙 ${currentSession.stageId === 1 ? 2 : 25} × ${isNoMiss ? 2 : 1} ＝ ${coins}</div>
       </div>
     </div>
 
