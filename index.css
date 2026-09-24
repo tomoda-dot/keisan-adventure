@@ -1510,7 +1510,7 @@ body.settings-bg-mode {
   font-size: 16px;
   font-weight: 900;
   color: #1a237e;
-  border-bottom: 2px solid #1a237e;
+  border-bottom: none;
   padding: 0 3px;
 }
 
