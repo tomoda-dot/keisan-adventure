@@ -209,6 +209,7 @@ function loadData() {
     console.error('Failed to load data:', e);
   }
   updateHeaderStats();
+  renderPracticeStageGrid();
 }
 
 function saveData() {
@@ -343,7 +344,7 @@ function renderPracticeStageGrid() {
 
     let subButtonsHtml = '';
     ['nobori', 'kudari', 'bara'].forEach(order => {
-      let lbl = order === 'nobori' ? 'のぼり' : (order === 'kudari' ? 'くだり' : 'ばらばら');
+      let lbl = getOrderLabel(order);
       const rec = recData[order] || { orb1: false, orb2: false, orb3: false };
 
       subButtonsHtml += `
@@ -481,9 +482,9 @@ function generateQuestions(type, stageId, order) {
   }
 
   if (order === 'nobori') {
-    list.sort((a, b) => a.n2 - b.n2);
+    list.sort((a, b) => a.ans - b.ans);
   } else if (order === 'kudari') {
-    list.sort((a, b) => b.n2 - a.n2);
+    list.sort((a, b) => b.ans - a.ans);
   } else {
     list.sort(() => 0.5 - Math.random());
   }
@@ -505,7 +506,7 @@ function renderGameplayQuestion() {
 
   const isAdd = currentSession.type === 'add';
   let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たし` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} の ひき` : 'くりさがりあり');
-  let orderLbl = currentSession.order === 'nobori' ? 'のぼり' : (currentSession.order === 'kudari' ? 'くだり' : 'ばらばら');
+  let orderLbl = getOrderLabel(currentSession.order);
 
   document.getElementById('gameplay-stage-title').innerText = `${stageName} ${orderLbl}`;
   document.getElementById('q-curr').innerText = currentSession.qIndex + 1;
@@ -688,7 +689,7 @@ function renderResultBlackboardModal(timeSec, qCount, wrongCount, coins, isNoMis
 
   const isAdd = currentSession.type === 'add';
   let stageName = isAdd ? (currentSession.stageId <= 9 ? `${currentSession.stageId} の たし` : 'くりあがりあり') : (currentSession.stageId <= 9 ? `${currentSession.stageId} の ひき` : 'くりさがりあり');
-  let orderLbl = currentSession.order === 'nobori' ? 'のぼり' : (currentSession.order === 'kudari' ? 'くだり' : 'ばらばら');
+  let orderLbl = getOrderLabel(currentSession.order);
 
   card.innerHTML = `
     <div style="font-size:14px;font-weight:800;color:#c8e6c9">けっか はっぴょう</div>
@@ -773,6 +774,22 @@ function setReadingMode(mode) {
   saveData();
 }
 
+function getUpOrderLabel() {
+  return gameState.settings.upOrderName === 'agari' ? 'あがり' : 'のぼり';
+}
+function getDownOrderLabel() {
+  return gameState.settings.downOrderName === 'sagari' ? 'さがり' : 'くだり';
+}
+function getRandOrderLabel() {
+  return gameState.settings.randOrderName === 'rand' ? 'ランダム' : 'ばらばら';
+}
+function getOrderLabel(order) {
+  if (order === 'nobori') return getUpOrderLabel();
+  if (order === 'kudari') return getDownOrderLabel();
+  if (order === 'bara') return getRandOrderLabel();
+  return order;
+}
+
 function setOrderName(type) {
   if (['nobori', 'agari'].includes(type)) {
     gameState.settings.upOrderName = type;
@@ -790,6 +807,8 @@ function setOrderName(type) {
     document.getElementById('opt-rnd-rand')?.classList.toggle('active', type === 'rand');
   }
   saveData();
+  renderPracticeStageGrid();
+  renderRecordsScreen();
 }
 
 function savePlayerName(val) {
@@ -808,6 +827,13 @@ function formatLevelOrbs(rec) {
 
 function renderRecordsScreen() {
   document.getElementById('player-name-input').value = gameState.playerName || 'プレーヤー';
+
+  const thNob = document.getElementById('rec-th-nobori');
+  if (thNob) thNob.innerText = getUpOrderLabel();
+  const thKud = document.getElementById('rec-th-kudari');
+  if (thKud) thKud.innerText = getDownOrderLabel();
+  const thBar = document.getElementById('rec-th-bara');
+  if (thBar) thBar.innerText = getRandOrderLabel();
 
   const tbodyPrac = document.getElementById('records-practice-tbody');
   if (tbodyPrac) {
@@ -889,7 +915,7 @@ function handleImportJSON(e) {
   reader.readAsText(file);
 }
 
-const APP_VERSION = 'Ver 3.1.5';
+const APP_VERSION = 'Ver 3.1.7';
 
 function updateVisitCounter() {
   const BASE_VISITS = 0;
