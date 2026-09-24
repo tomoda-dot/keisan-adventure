@@ -253,14 +253,14 @@ body {
 
 .logo-wrapper {
   width: 100%;
-  max-width: 760px;
+  max-width: 880px;
   display: flex;
   justify-content: center;
 }
 
 .top-logo-svg {
   width: 100%;
-  max-width: 760px;
+  max-width: 880px;
   height: auto;
   overflow: visible;
   filter: drop-shadow(0 6px 12px rgba(0,0,0,0.12));
@@ -268,7 +268,7 @@ body {
 
 .svg-sub-text {
   font-family: var(--font-family);
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 900;
   letter-spacing: 2px;
 }
@@ -288,7 +288,7 @@ body {
 
 .svg-main-title text {
   font-family: var(--font-family);
-  font-size: 96px;
+  font-size: 90px;
   font-weight: 900;
   text-anchor: middle;
   dominant-baseline: central;
@@ -297,7 +297,7 @@ body {
 .stroke-outer {
   fill: none;
   stroke: #660000;
-  stroke-width: 28px;
+  stroke-width: 22px;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
@@ -305,7 +305,7 @@ body {
 .stroke-inner {
   fill: none;
   stroke: #ffffff;
-  stroke-width: 14px;
+  stroke-width: 11px;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
