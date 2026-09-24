@@ -295,6 +295,17 @@ function openScreen(screenId, isBack = false) {
     const recTitle = document.getElementById('header-title-records');
     const setTitle = document.getElementById('header-title-settings');
 
+    const countOverlay = document.getElementById('countdown-overlay');
+    if (countOverlay && screenId !== 'gameplay') {
+      countOverlay.style.setProperty('display', 'none', 'important');
+      countOverlay.classList.add('hidden');
+    }
+    const resOverlay = document.getElementById('modal-result-overlay');
+    if (resOverlay && screenId !== 'gameplay') {
+      resOverlay.style.setProperty('display', 'none', 'important');
+      resOverlay.classList.add('hidden');
+    }
+
     if (screenId === 'records') {
       document.body.classList.remove('settings-bg-mode', 'pink-diamond-bg-mode');
       header?.classList.add('records-mode');
@@ -517,7 +528,10 @@ function triggerCountdown(onComplete) {
   currentSession.isCountingDown = true;
   const overlay = document.getElementById('countdown-overlay');
   const textEl = document.getElementById('countdown-text');
-  overlay.classList.remove('hidden');
+  if (overlay) {
+    overlay.style.setProperty('display', 'flex', 'important');
+    overlay.classList.remove('hidden');
+  }
 
   const steps = [
     { text: '3', tone: 523.25 },
@@ -531,22 +545,27 @@ function triggerCountdown(onComplete) {
   function runStep() {
     if (stepIdx < steps.length) {
       const step = steps[stepIdx];
-      textEl.innerText = step.text;
+      if (textEl) textEl.innerText = step.text;
       
-      textEl.style.animation = 'none';
-      void textEl.offsetWidth;
-      textEl.style.animation = 'countPop 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      if (textEl) {
+        textEl.style.animation = 'none';
+        void textEl.offsetWidth;
+        textEl.style.animation = 'countPop 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      }
 
       if (step.startTone) {
-        audio.playStartTone();
+        if (typeof audio !== 'undefined' && audio.playStartTone) audio.playStartTone();
       } else {
-        audio.playBeep(step.tone, 0.15);
+        if (typeof audio !== 'undefined' && audio.playBeep) audio.playBeep(step.tone, 0.15);
       }
 
       stepIdx++;
-      setTimeout(runStep, stepIdx === steps.length ? 750 : 750);
+      setTimeout(runStep, 750);
     } else {
-      overlay.classList.add('hidden');
+      if (overlay) {
+        overlay.style.setProperty('display', 'none', 'important');
+        overlay.classList.add('hidden');
+      }
       currentSession.isCountingDown = false;
       if (onComplete) onComplete();
     }
@@ -808,7 +827,10 @@ function finishSession() {
 
 function renderResultBlackboardModal(timeSec, qCount, wrongCount, coins, isNoMiss, isNewRecord, orb1, orb2, orb3) {
   const overlay = document.getElementById('modal-result-overlay');
-  overlay.classList.remove('hidden');
+  if (overlay) {
+    overlay.style.setProperty('display', 'flex', 'important');
+    overlay.classList.remove('hidden');
+  }
 
   const card = overlay.querySelector('.modal-result');
   card.style.background = 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)';
@@ -857,7 +879,11 @@ function renderResultBlackboardModal(timeSec, qCount, wrongCount, coins, isNoMis
 }
 
 function closeResultModal() {
-  document.getElementById('modal-result-overlay').classList.add('hidden');
+  const overlay = document.getElementById('modal-result-overlay');
+  if (overlay) {
+    overlay.style.setProperty('display', 'none', 'important');
+    overlay.classList.add('hidden');
+  }
 }
 
 /* ================= SETTINGS & RECORDS MANAGEMENT ================= */
