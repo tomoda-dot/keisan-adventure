@@ -86,9 +86,10 @@ body {
 /* Global Header matching original screenshot transparent overlay */
 .global-header {
   height: 60px;
-  background: transparent;
-  backdrop-filter: none;
-  border-bottom: none;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1356,28 +1357,33 @@ body.settings-bg-mode {
   letter-spacing: 2px;
 }
 
-/* Records Screen Colored Global Header */
+/* Records Screen Transparent Global Header */
 .global-header.records-mode {
-  background: #5ebec4 !important;
-  border-bottom: 3.5px solid #4db6ac;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
 }
 
 .header-title-records {
   font-family: var(--font-family);
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 900;
-  color: #ffffff;
+  color: #00796b;
   letter-spacing: 2px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  background: #ffffff;
+  padding: 4px 36px;
+  border-radius: 20px;
+  border: 3.5px solid #5ebec4;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
 }
 
 .header-title-records rt {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  color: #e0f2f1;
+  color: #00796b;
 }
 
 /* Records Practice Table Tab Selector */
@@ -1534,13 +1540,16 @@ body.settings-bg-mode {
 .title-blue { color: var(--blue-primary); font-weight: 900; font-size: 15px; margin-bottom: 6px; }
 
 .records-scroll-table {
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .rec-table {
   width: 100%;
+  height: 100%;
   border-collapse: collapse;
   font-size: 11.5px;
   text-align: center;
@@ -1548,7 +1557,7 @@ body.settings-bg-mode {
 
 .rec-table th, .rec-table td {
   border: 1px solid #e0e0e0;
-  padding: 3px 2px;
+  padding: 4px 2px;
 }
 
 .rec-table th {
