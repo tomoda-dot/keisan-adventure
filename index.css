@@ -1166,6 +1166,13 @@ body.pink-diamond-bg-mode {
   animation: movePinkDiamondBg 25s linear infinite !important;
 }
 
+body.cyan-diamond-bg-mode {
+  background-color: #e0f7fa !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%234dd0e1' fill-opacity='0.4'%3E%3Cpolygon points='20,6 34,20 20,34 6,20'/%3E%3Cpolygon points='60,46 74,60 60,74 46,60'/%3E%3Cpolygon points='60,10 70,20 60,30 50,20'/%3E%3Cpolygon points='20,50 30,60 20,70 10,60'/%3E%3C/g%3E%3C/svg%3E") !important;
+  background-size: 80px 80px !important;
+  animation: movePinkDiamondBg 25s linear infinite !important;
+}
+
 #screen-settings {
   background: transparent !important;
   padding: 12px 16px 12px 16px;

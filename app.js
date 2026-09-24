@@ -307,14 +307,14 @@ function openScreen(screenId, isBack = false) {
     }
 
     if (screenId === 'records') {
-      document.body.classList.remove('settings-bg-mode', 'pink-diamond-bg-mode');
+      document.body.classList.remove('settings-bg-mode', 'pink-diamond-bg-mode', 'cyan-diamond-bg-mode');
       header?.classList.add('records-mode');
       header?.classList.remove('settings-mode');
       recTitle?.classList.remove('hidden');
       setTitle?.classList.add('hidden');
       renderRecordsScreen();
     } else if (screenId === 'settings') {
-      document.body.classList.remove('pink-diamond-bg-mode');
+      document.body.classList.remove('pink-diamond-bg-mode', 'cyan-diamond-bg-mode');
       document.body.classList.add('settings-bg-mode');
       header?.classList.remove('records-mode');
       header?.classList.add('settings-mode');
@@ -323,12 +323,18 @@ function openScreen(screenId, isBack = false) {
       syncSettingsUI();
     } else if (screenId === 'practice-select' || screenId === 'challenge-select') {
       document.body.classList.remove('settings-bg-mode');
-      document.body.classList.add('pink-diamond-bg-mode');
+      if (screenId === 'practice-select' && activePracticeTab === 'sub') {
+        document.body.classList.remove('pink-diamond-bg-mode');
+        document.body.classList.add('cyan-diamond-bg-mode');
+      } else {
+        document.body.classList.remove('cyan-diamond-bg-mode');
+        document.body.classList.add('pink-diamond-bg-mode');
+      }
       header?.classList.remove('records-mode', 'settings-mode');
       recTitle?.classList.add('hidden');
       setTitle?.classList.add('hidden');
     } else {
-      document.body.classList.remove('settings-bg-mode', 'pink-diamond-bg-mode');
+      document.body.classList.remove('settings-bg-mode', 'pink-diamond-bg-mode', 'cyan-diamond-bg-mode');
       header?.classList.remove('records-mode', 'settings-mode');
       recTitle?.classList.add('hidden');
       setTitle?.classList.add('hidden');
@@ -402,6 +408,13 @@ function updatePracticeTitleBanner() {
   const banner = document.getElementById('practice-title-banner');
   const btnArrow = document.getElementById('btn-arrow-mode');
   const isAdd = activePracticeTab === 'add';
+
+  document.body.classList.remove('pink-diamond-bg-mode', 'cyan-diamond-bg-mode');
+  if (isAdd) {
+    document.body.classList.add('pink-diamond-bg-mode');
+  } else {
+    document.body.classList.add('cyan-diamond-bg-mode');
+  }
 
   if (banner) {
     banner.innerText = isAdd ? 'たしざん れんしゅう' : 'ひきざん れんしゅう';
