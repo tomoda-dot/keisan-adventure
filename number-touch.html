@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ナンバータッチ！1〜100 | けいさんアドベンチャー</title>
+  <title>ナンバータッチ！1〜80 | けいさんアドベンチャー</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
@@ -293,11 +293,11 @@
     </div>
 
     <div class="mode-bar" id="mode-bar">
-      <button class="mode-chip active" data-mode="5x5_seq" onclick="selectMode('5x5_seq')">5×5 (1〜25)</button>
-      <button class="mode-chip" data-mode="5x5_rand100" onclick="selectMode('5x5_rand100')">5×5 (1〜100から)</button>
+      <button class="mode-chip" data-mode="5x5_seq" onclick="selectMode('5x5_seq')">5×5 (1〜25)</button>
+      <button class="mode-chip active" data-mode="5x5_rand80" onclick="selectMode('5x5_rand80')">5×5 (1〜80から)</button>
       <button class="mode-chip" data-mode="7x7_seq" onclick="selectMode('7x7_seq')">7×7 (1〜49)</button>
-      <button class="mode-chip" data-mode="7x7_rand100" onclick="selectMode('7x7_rand100')">7×7 (1〜100から)</button>
-      <button class="mode-chip" data-mode="10x10_100" onclick="selectMode('10x10_100')">10×10 (1〜100)</button>
+      <button class="mode-chip" data-mode="7x7_rand80" onclick="selectMode('7x7_rand80')">7×7 (1〜80から)</button>
+      <button class="mode-chip" data-mode="8x10_80" onclick="selectMode('8x10_80')">ぜんぶ (1〜80)</button>
     </div>
 
     <div class="hud">
@@ -326,7 +326,7 @@
       <div class="modal-emoji">🎈</div>
       <div class="modal-h">ナンバータッチ！</div>
       <p class="modal-p">
-        1〜100までの すうじが ランダムに ならぶよ！<br>
+        1〜80までの すうじが ランダムに ならぶよ！<br>
         <b>ちいさい じゅんばん</b> に タップして ぜんぶ けそう！
       </p>
       <button class="big-btn" onclick="startGame()">▶ スタート！</button>
@@ -350,14 +350,14 @@
   <script>
     const BEST_KEY = 'NUMBER_TOUCH_BEST_V1';
     const MODES = {
-      '5x5_seq':     { size: 5, count: 25, maxNum: 25,  label: '5×5 (1〜25)' },
-      '5x5_rand100': { size: 5, count: 25, maxNum: 100, label: '5×5 (1〜100から25個)' },
-      '7x7_seq':     { size: 7, count: 49, maxNum: 49,  label: '7×7 (1〜49)' },
-      '7x7_rand100': { size: 7, count: 49, maxNum: 100, label: '7×7 (1〜100から49個)' },
-      '10x10_100':   { size: 10, count: 100, maxNum: 100, label: '10×10 (1〜100)' }
+      '5x5_seq':    { cols: 5,  rows: 5,  count: 25, maxNum: 25, label: '5×5 (1〜25)' },
+      '5x5_rand80': { cols: 5,  rows: 5,  count: 25, maxNum: 80, label: '5×5 (1〜80から25個)' },
+      '7x7_seq':    { cols: 7,  rows: 7,  count: 49, maxNum: 49, label: '7×7 (1〜49)' },
+      '7x7_rand80': { cols: 7,  rows: 7,  count: 49, maxNum: 80, label: '7×7 (1〜80から49個)' },
+      '8x10_80':    { cols: 10, rows: 8,  count: 80, maxNum: 80, label: 'ぜんぶ (1〜80)' }
     };
 
-    let currentMode = '5x5_rand100';
+    let currentMode = '5x5_rand80';
     let sortedTargets = [];
     let targetIdx = 0;
     let startTime = 0;
@@ -494,13 +494,17 @@
       const stage = document.getElementById('board-stage');
       const board = document.getElementById('board');
       const rect = stage.getBoundingClientRect();
-      const avail = Math.min(rect.width, rect.height) - 24;
-      const gap = cfg.size >= 10 ? 4 : (cfg.size >= 7 ? 5 : 7);
-      const cellSize = Math.max(24, Math.floor((avail - gap * (cfg.size - 1)) / cfg.size));
-      const fontSize = Math.max(12, Math.floor(cellSize * 0.42));
+      const isPortrait = rect.height > rect.width;
+      const cols = isPortrait ? Math.min(cfg.cols, cfg.rows) : Math.max(cfg.cols, cfg.rows);
+      const rows = isPortrait ? Math.max(cfg.cols, cfg.rows) : Math.min(cfg.cols, cfg.rows);
+      const gap = Math.max(cols, rows) >= 9 ? 5 : (Math.max(cols, rows) >= 7 ? 5 : 7);
+      const maxW = Math.floor((rect.width - 24 - gap * (cols - 1)) / cols);
+      const maxH = Math.floor((rect.height - 24 - gap * (rows - 1)) / rows);
+      const cellSize = Math.max(26, Math.min(maxW, maxH));
+      const fontSize = Math.max(13, Math.floor(cellSize * 0.42));
       const radius = Math.max(6, Math.floor(cellSize * 0.24));
 
-      board.style.gridTemplateColumns = `repeat(${cfg.size}, ${cellSize}px)`;
+      board.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
       board.style.setProperty('--cell-size', cellSize + 'px');
       board.style.setProperty('--cell-gap', gap + 'px');
       board.style.setProperty('--cell-font', fontSize + 'px');
