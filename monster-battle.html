@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ぴったりアタック！ | けいさんアドベンチャー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pri: #e53935;
+      --pri-dark: #b71c1c;
+      --bg: #ffebee;
+      --text: #263238;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      height: 100dvh;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* 単色メインバー */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      margin: 0 -14px;
+      padding: 10px 14px;
+      background: var(--pri);
+      box-shadow: 0 3px 0 var(--pri-dark);
+    }
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+    }
+    .pill-btn:active { transform: translateY(2px); }
+    .pill-btn.sound-on { background: #fff8e1; color: #ef6c00; }
+    .game-title {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4vw, 24px);
+      color: #fff;
+      text-shadow: 0 2px 0 var(--pri-dark);
+      white-space: nowrap;
+    }
+
+    /* 設定バー（難易度・プレイモード） */
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .chip-group {
+      display: flex;
+      gap: 6px;
+      background: rgba(255,255,255,0.7);
+      padding: 4px;
+      border-radius: 999px;
+      border: 2px solid #ffcdd2;
+    }
+    .mode-chip {
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: #546e7a;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-chip.active {
+      background: var(--pri);
+      color: #fff;
+      box-shadow: 0 2px 0 var(--pri-dark);
+    }
+
+    /* HUD */
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .hud-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 6px 8px;
+      text-align: center;
+      border: 2px solid #ffcdd2;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+    }
+    .hud-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #78909c;
+    }
+    .hud-val {
+      font-size: clamp(16px, 3.6vw, 20px);
+      font-weight: 900;
+      color: var(--pri-dark);
+    }
+    .hud-val.warn { color: #d50000; animation: pulseWarn 0.6s infinite alternate; }
+    @keyframes pulseWarn {
+      from { transform: scale(1); }
+      to { transform: scale(1.08); }
+    }
+
+    /* バトルステージ */
+    .stage {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      background: linear-gradient(180deg, #fff 0%, #fff5f5 100%);
+      border-radius: 24px;
+      border: 4px solid #ef9a9a;
+      box-shadow: 0 8px 0 #e57373, inset 0 0 24px rgba(229, 57, 53, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 16px;
+      overflow: hidden;
+    }
+    .stage.shake {
+      animation: stageShake 0.18s ease;
+    }
+    .stage.big-shake {
+      animation: stageBigShake 0.35s ease;
+    }
+    @keyframes stageShake {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(-4px, 2px); }
+      50% { transform: translate(4px, -2px); }
+      75% { transform: translate(-2px, -2px); }
+    }
+    @keyframes stageBigShake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-8px, 4px); }
+      40% { transform: translate(8px, -4px); }
+      60% { transform: translate(-6px, -3px); }
+      80% { transform: translate(5px, 3px); }
+    }
+
+    /* モンスターヘッダー */
+    .monster-header {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 2;
+    }
+    .monster-name {
+      display: inline-block;
+      background: #ffebee;
+      color: #c62828;
+      border: 2px solid #ef9a9a;
+      border-radius: 999px;
+      padding: 2px 14px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    /* HP表示 */
+    .hp-display {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 8px;
+    }
+    .hp-caption {
+      font-size: clamp(14px, 3vw, 17px);
+      font-weight: 900;
+      color: #546e7a;
+    }
+    .hp-number {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(46px, 11vw, 68px);
+      line-height: 1;
+      color: #d32f2f;
+      text-shadow: 0 3px 0 #ffcdd2;
+      transition: transform 0.1s;
+    }
+    .hp-number.hit { transform: scale(1.12); }
+    .hp-number.zero { color: #2e7d32; text-shadow: 0 3px 0 #c8e6c9; }
+
+    /* HPバー */
+    .hp-bar-wrap {
+      width: min(440px, 92%);
+      height: 18px;
+      background: #eceff1;
+      border-radius: 999px;
+      border: 2px solid #cfd8dc;
+      overflow: hidden;
+      position: relative;
+    }
+    .hp-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #ff5252 0%, #ff8a65 100%);
+      border-radius: 999px;
+      transition: width 0.15s ease-out;
+    }
+    .hp-bar-fill.low {
+      background: linear-gradient(90deg, #ffb300 0%, #ffd54f 100%);
+    }
+
+    /* 10のまとまりガイド */
+    .tens-hint {
+      font-size: 12px;
+      font-weight: 800;
+      color: #78909c;
+      min-height: 18px;
+    }
+
+    /* モンスター本体 */
+    .monster-arena {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+    .monster-sprite {
+      font-size: clamp(78px, 18vw, 120px);
+      line-height: 1;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,0.14));
+      animation: monsterFloat 2.2s ease-in-out infinite;
+      transition: transform 0.12s, opacity 0.25s;
+      cursor: default;
+    }
+    @keyframes monsterFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .monster-sprite.damaged {
+      animation: monsterHit 0.18s ease;
+    }
+    @keyframes monsterHit {
+      0% { transform: scale(1) rotate(0deg); filter: brightness(1.6) drop-shadow(0 0 12px #ff5252); }
+      40% { transform: scale(0.88) rotate(-8deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .monster-sprite.defeated {
+      animation: monsterDefeat 0.5s ease forwards;
+    }
+    @keyframes monsterDefeat {
+      0% { transform: scale(1); opacity: 1; }
+      40% { transform: scale(1.28) rotate(12deg); opacity: 1; }
+      100% { transform: scale(0.1) rotate(-30deg); opacity: 0; }
+    }
+
+    /* ポップアップダメージ */
+    .dmg-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 5;
+    }
+    .dmg-pop {
+      position: absolute;
+      font-family: 'Potta One', cursive;
+      font-size: clamp(22px, 5vw, 30px);
+      font-weight: 900;
+      color: #ff1744;
+      text-shadow: 0 2px 0 #fff, 0 -2px 0 #fff, 2px 0 0 #fff, -2px 0 0 #fff;
+      animation: dmgFloat 0.65s ease-out forwards;
+      white-space: nowrap;
+    }
+    .dmg-pop.heal {
+      color: #0288d1;
+    }
+    @keyframes dmgFloat {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(0.7); }
+      25% { opacity: 1; transform: translate(-50%, -20px) scale(1.18); }
+      100% { opacity: 0; transform: translate(-50%, -64px) scale(0.95); }
+    }
+
+    /* 状態バナー（ぴったり！ / やりすぎ！） */
+    .status-banner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      padding: 10px 24px;
+      border-radius: 999px;
+      font-family: 'Potta One', cursive;
+      font-size: clamp(22px, 5.5vw, 34px);
+      color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .status-banner.win {
+      background: #2e7d32;
+      border: 4px solid #fff;
+      animation: bannerPop 0.6s ease forwards;
+    }
+    .status-banner.over {
+      background: #fb8c00;
+      border: 4px solid #fff;
+      animation: bannerPop 0.8s ease forwards;
+    }
+    @keyframes bannerPop {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      25% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+      75% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -60%) scale(0.95); }
+    }
+
+    /* 攻撃ボタンエリア */
+    .attack-dock {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 12px;
+      padding: 4px 0 2px;
+    }
+    .atk-btn {
+      flex: 1;
+      max-width: 170px;
+      min-height: 76px;
+      border-radius: 22px;
+      border: 4px solid #fff;
+      font-family: inherit;
+      font-weight: 900;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      transition: transform 0.06s;
+      position: relative;
+    }
+    .atk-btn:active {
+      transform: translateY(5px);
+    }
+    .atk-btn.val-1 {
+      background: #42a5f5;
+      box-shadow: 0 6px 0 #1565c0;
+    }
+    .atk-btn.val-1:active { box-shadow: 0 1px 0 #1565c0; }
+
+    .atk-btn.val-3 {
+      background: #ab47bc;
+      box-shadow: 0 6px 0 #6a1b9a;
+    }
+    .atk-btn.val-3:active { box-shadow: 0 1px 0 #6a1b9a; }
+
+    .atk-btn.val-5 {
+      background: #ff9800;
+      box-shadow: 0 6px 0 #e65100;
+    }
+    .atk-btn.val-5:active { box-shadow: 0 1px 0 #e65100; }
+
+    .atk-btn.val-10 {
+      background: #ef5350;
+      box-shadow: 0 6px 0 #b71c1c;
+    }
+    .atk-btn.val-10:active { box-shadow: 0 1px 0 #b71c1c; }
+
+    .atk-btn.val-minus1 {
+      background: #66bb6a;
+      box-shadow: 0 6px 0 #2e7d32;
+      max-width: 130px;
+    }
+    .atk-btn.val-minus1:active { box-shadow: 0 1px 0 #2e7d32; }
+
+    .atk-main {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(26px, 6vw, 34px);
+      line-height: 1.05;
+    }
+    .atk-sub {
+      font-size: 11px;
+      font-weight: 800;
+      opacity: 0.95;
+    }
+
+    /* リザルトオーバーレイ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(38, 50, 56, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .overlay.show { display: flex; }
+    .result-card {
+      background: #fff;
+      border-radius: 28px;
+      border: 5px solid #ef9a9a;
+      padding: 26px 24px;
+      width: min(400px, 100%);
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+      animation: cardIn 0.25s ease-out;
+    }
+    @keyframes cardIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .result-title {
+      font-family: 'Potta One', cursive;
+      font-size: 28px;
+      color: var(--pri);
+      margin-bottom: 14px;
+    }
+    .result-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .r-box {
+      background: #ffebee;
+      border-radius: 16px;
+      padding: 10px;
+      border: 2px solid #ffcdd2;
+    }
+    .r-label { font-size: 12px; font-weight: 800; color: #78909c; }
+    .r-val { font-size: 24px; font-weight: 900; color: var(--pri-dark); }
+    .retry-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 18px;
+      border: none;
+      background: var(--pri);
+      color: #fff;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--pri-dark);
+    }
+    .retry-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--pri-dark); }
+
+    /* 紙吹雪 */
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 14px;
+      border-radius: 3px;
+      animation: fall 1.2s ease-out forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(540deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top-bar">
+      <a href="index.html" class="pill-btn">🏠 TOP</a>
+      <h1 class="game-title">⚔️ ぴったりアタック！</h1>
+      <button id="sound-btn" class="pill-btn sound-on" type="button">🎵 ON</button>
+    </header>
+
+    <div class="controls-row">
+      <div class="chip-group" id="diff-group">
+        <button class="mode-chip active" data-diff="easy" type="button">かんたん</button>
+        <button class="mode-chip" data-diff="normal" type="button">ふつう</button>
+        <button class="mode-chip" data-diff="hard" type="button">むずかしい</button>
+      </div>
+      <div class="chip-group" id="play-group">
+        <button class="mode-chip active" data-play="time" type="button">⏱️ 60びょう</button>
+        <button class="mode-chip" data-play="practice" type="button">🌱 れんしゅう</button>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="hud-box">
+        <div class="hud-label" id="hud-time-label">のこりじかん</div>
+        <div class="hud-val" id="hud-time">60</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">たおしたかず</div>
+        <div class="hud-val" id="hud-score">0たい</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">ハイスコア</div>
+        <div class="hud-val" id="hud-best">0たい</div>
+      </div>
+    </div>
+
+    <main class="stage" id="stage">
+      <div class="monster-header">
+        <span class="monster-name" id="monster-name">ぷにスライム</span>
+        <div class="hp-display">
+          <span class="hp-caption">のこりHP</span>
+          <span class="hp-number" id="hp-number">15</span>
+        </div>
+        <div class="hp-bar-wrap">
+          <div class="hp-bar-fill" id="hp-bar"></div>
+        </div>
+        <div class="tens-hint" id="tens-hint">10が 1つ と 5</div>
+      </div>
+
+      <div class="monster-arena">
+        <div class="monster-sprite" id="monster-sprite">👾</div>
+        <div class="dmg-layer" id="dmg-layer"></div>
+        <div class="status-banner" id="status-banner"></div>
+      </div>
+    </main>
+
+    <section class="attack-dock" id="attack-dock"></section>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <div class="overlay" id="result-overlay">
+    <div class="result-card">
+      <div class="result-title">⏱️ タイムアップ！</div>
+      <div class="result-stats">
+        <div class="r-box">
+          <div class="r-label">たおしたかず</div>
+          <div class="r-val" id="res-score">0たい</div>
+        </div>
+        <div class="r-box">
+          <div class="r-label">ハイスコア</div>
+          <div class="r-val" id="res-best">0たい</div>
+        </div>
+        <div class="r-box">
+          <div class="r-label">タップかいすう</div>
+          <div class="r-val" id="res-taps">0かい</div>
+        </div>
+        <div class="r-box">
+          <div class="r-label">やりすぎ</div>
+          <div class="r-val" id="res-over">0かい</div>
+        </div>
+      </div>
+      <button class="retry-btn" id="retry-btn" type="button">🔥 もういちど あそぶ</button>
+    </div>
+  </div>
+
+  <script>
+    const MONSTERS = [
+      { emoji: '👾', name: 'ピコエイリアン' },
+      { emoji: '👹', name: 'アカオニくん' },
+      { emoji: '🐲', name: 'ミニドラゴン' },
+      { emoji: '👻', name: 'フワフワおばけ' },
+      { emoji: '🤖', name: 'ブリキロボ' },
+      { emoji: '🐙', name: 'タコキング' },
+      { emoji: '🦖', name: 'ガオガオザウルス' },
+      { emoji: '🦇', name: 'パタパタコウモリ' },
+      { emoji: '🐸', name: 'ケロケロ大王' },
+      { emoji: '🦊', name: 'コンコンきつね' }
+    ];
+
+    const DIFF_CONFIG = {
+      easy: {
+        minHp: 5,
+        maxHp: 20,
+        buttons: [
+          { val: 1, label: '+1', sub: 'ちょっと', cls: 'val-1' },
+          { val: 5, label: '+5', sub: 'ドン！', cls: 'val-5' }
+        ]
+      },
+      normal: {
+        minHp: 15,
+        maxHp: 50,
+        buttons: [
+          { val: 1, label: '+1', sub: 'ちょっと', cls: 'val-1' },
+          { val: 5, label: '+5', sub: 'ドン！', cls: 'val-5' },
+          { val: 10, label: '+10', sub: 'ドカン！', cls: 'val-10' }
+        ]
+      },
+      hard: {
+        minHp: 30,
+        maxHp: 100,
+        buttons: [
+          { val: -1, label: '-1', sub: 'もどす', cls: 'val-minus1' },
+          { val: 1, label: '+1', sub: 'ちょっと', cls: 'val-1' },
+          { val: 3, label: '+3', sub: 'バシッ！', cls: 'val-3' },
+          { val: 10, label: '+10', sub: 'ドカン！', cls: 'val-10' }
+        ]
+      }
+    };
+
+    const BEST_KEY_PREFIX = 'keisan_battle_best_';
+
+    let diff = 'easy';
+    let playMode = 'time'; // 'time' | 'practice'
+    let soundOn = true;
+    let audioCtx = null;
+
+    let maxHp = 15;
+    let hp = 15;
+    let score = 0;
+    let taps = 0;
+    let overCount = 0;
+    let timeLeft = 60;
+    let timerId = null;
+    let timerStarted = false;
+    let locked = false;
+    let monsterIdx = -1;
+
+    const $ = id => document.getElementById(id);
+    const stageEl = $('stage');
+    const hpNumEl = $('hp-number');
+    const hpBarEl = $('hp-bar');
+    const tensHintEl = $('tens-hint');
+    const spriteEl = $('monster-sprite');
+    const nameEl = $('monster-name');
+    const dmgLayerEl = $('dmg-layer');
+    const bannerEl = $('status-banner');
+    const dockEl = $('attack-dock');
+    const hudTimeEl = $('hud-time');
+    const hudTimeLabelEl = $('hud-time-label');
+    const hudScoreEl = $('hud-score');
+    const hudBestEl = $('hud-best');
+    const overlayEl = $('result-overlay');
+
+    function getBest() {
+      return Number(localStorage.getItem(BEST_KEY_PREFIX + diff) || 0);
+    }
+    function setBest(val) {
+      localStorage.setItem(BEST_KEY_PREFIX + diff, String(val));
+    }
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, dur, type = 'triangle', gainVal = 0.16, delay = 0) {
+      if (!soundOn) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime + delay;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(gainVal, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + dur);
+    }
+
+    function playHitSfx(val) {
+      if (val < 0) {
+        playTone(440, 0.08, 'sine', 0.14);
+        playTone(554, 0.09, 'sine', 0.12, 0.05);
+        return;
+      }
+      const base = val >= 10 ? 220 : val >= 5 ? 320 : val >= 3 ? 380 : 480;
+      playTone(base, 0.07, 'square', 0.12);
+      playTone(base * 1.4, 0.06, 'triangle', 0.12, 0.02);
+    }
+
+    function playWinSfx() {
+      playTone(523.25, 0.09, 'triangle', 0.18, 0);
+      playTone(659.25, 0.09, 'triangle', 0.18, 0.07);
+      playTone(783.99, 0.12, 'triangle', 0.2, 0.14);
+      playTone(1046.5, 0.22, 'triangle', 0.22, 0.21);
+    }
+
+    function playOverSfx() {
+      playTone(260, 0.12, 'sawtooth', 0.12, 0);
+      playTone(195, 0.18, 'sawtooth', 0.12, 0.1);
+    }
+
+    function playFinishSfx() {
+      playTone(587.33, 0.12, 'triangle', 0.18, 0);
+      playTone(783.99, 0.12, 'triangle', 0.18, 0.12);
+      playTone(987.77, 0.28, 'triangle', 0.2, 0.24);
+    }
+
+    function spawnConfetti() {
+      const box = $('confetti');
+      const colors = ['#ff5252', '#ffca28', '#66bb6a', '#42a5f5', '#ab47bc'];
+      for (let i = 0; i < 24; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-piece';
+        p.style.left = (10 + Math.random() * 80) + 'vw';
+        p.style.top = (-10 - Math.random() * 20) + 'px';
+        p.style.background = colors[i % colors.length];
+        p.style.animationDuration = (0.85 + Math.random() * 0.6) + 's';
+        box.appendChild(p);
+        setTimeout(() => p.remove(), 1600);
+      }
+    }
+
+    function showBanner(text, type) {
+      bannerEl.className = 'status-banner';
+      void bannerEl.offsetWidth;
+      bannerEl.textContent = text;
+      bannerEl.className = 'status-banner ' + type;
+    }
+
+    function spawnDamagePop(text, isHeal = false) {
+      const el = document.createElement('div');
+      el.className = 'dmg-pop' + (isHeal ? ' heal' : '');
+      el.textContent = text;
+      const offsetX = 50 + (Math.random() * 28 - 14);
+      const offsetY = 42 + (Math.random() * 18 - 9);
+      el.style.left = offsetX + '%';
+      el.style.top = offsetY + '%';
+      dmgLayerEl.appendChild(el);
+      setTimeout(() => el.remove(), 680);
+    }
+
+    function formatTensHint(val) {
+      if (val <= 0) return 'ぴったり 0！';
+      const tens = Math.floor(val / 10);
+      const ones = val % 10;
+      if (tens === 0) return `1のまとまりが ${ones}こ`;
+      if (ones === 0) return `10のまとまりが ${tens}つ`;
+      return `10が ${tens}つ と ${ones}`;
+    }
+
+    function updateHpUI() {
+      hpNumEl.textContent = hp;
+      hpNumEl.classList.toggle('zero', hp === 0);
+      const pct = Math.max(0, Math.min(100, (hp / maxHp) * 100));
+      hpBarEl.style.width = pct + '%';
+      hpBarEl.classList.toggle('low', pct <= 30);
+      tensHintEl.textContent = formatTensHint(hp);
+    }
+
+    function updateHud() {
+      hudScoreEl.textContent = score + 'たい';
+      hudBestEl.textContent = getBest() + 'たい';
+      if (playMode === 'time') {
+        hudTimeLabelEl.textContent = 'のこりじかん';
+        hudTimeEl.textContent = timeLeft;
+        hudTimeEl.classList.toggle('warn', timeLeft <= 10 && timeLeft > 0);
+      } else {
+        hudTimeLabelEl.textContent = 'モード';
+        hudTimeEl.textContent = '∞';
+        hudTimeEl.classList.remove('warn');
+      }
+    }
+
+    function renderButtons() {
+      const cfg = DIFF_CONFIG[diff];
+      dockEl.innerHTML = '';
+      cfg.buttons.forEach(btn => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'atk-btn ' + btn.cls;
+        b.innerHTML = `<span class="atk-main">${btn.label}</span><span class="atk-sub">${btn.sub}</span>`;
+        b.addEventListener('click', () => onAttack(btn.val));
+        dockEl.appendChild(b);
+      });
+    }
+
+    function nextMonster() {
+      const cfg = DIFF_CONFIG[diff];
+      maxHp = cfg.minHp + Math.floor(Math.random() * (cfg.maxHp - cfg.minHp + 1));
+      hp = maxHp;
+
+      let nextIdx;
+      do {
+        nextIdx = Math.floor(Math.random() * MONSTERS.length);
+      } while (nextIdx === monsterIdx && MONSTERS.length > 1);
+      monsterIdx = nextIdx;
+
+      const m = MONSTERS[monsterIdx];
+      nameEl.textContent = m.name;
+      spriteEl.className = 'monster-sprite';
+      spriteEl.textContent = m.emoji;
+      locked = false;
+      updateHpUI();
+    }
+
+    function startTimerIfNeeded() {
+      if (playMode !== 'time' || timerStarted) return;
+      timerStarted = true;
+      timerId = setInterval(() => {
+        timeLeft--;
+        updateHud();
+        if (timeLeft <= 0) {
+          finishTimeAttack();
+        }
+      }, 1000);
+    }
+
+    function finishTimeAttack() {
+      clearInterval(timerId);
+      timerId = null;
+      locked = true;
+      if (score > getBest()) {
+        setBest(score);
+      }
+      updateHud();
+      playFinishSfx();
+      $('res-score').textContent = score + 'たい';
+      $('res-best').textContent = getBest() + 'たい';
+      $('res-taps').textContent = taps + 'かい';
+      $('res-over').textContent = overCount + 'かい';
+      overlayEl.classList.add('show');
+    }
+
+    function onAttack(val) {
+      if (locked) return;
+      startTimerIfNeeded();
+      taps++;
+
+      if (val < 0) {
+        // -1（微調整ボタン）：残りHPを1戻す
+        if (hp < maxHp) {
+          hp = Math.min(maxHp, hp + 1);
+          playHitSfx(-1);
+          spawnDamagePop('+1 もどす', true);
+          updateHpUI();
+        }
+        return;
+      }
+
+      hp -= val;
+      playHitSfx(val);
+      spawnDamagePop('-' + val);
+
+      // 揺れ & ヒット演出
+      stageEl.classList.remove('shake', 'big-shake');
+      void stageEl.offsetWidth;
+      stageEl.classList.add(val >= 10 ? 'big-shake' : 'shake');
+
+      hpNumEl.classList.remove('hit');
+      void hpNumEl.offsetWidth;
+      hpNumEl.classList.add('hit');
+
+      spriteEl.classList.remove('damaged');
+      void spriteEl.offsetWidth;
+      spriteEl.classList.add('damaged');
+
+      if (hp === 0) {
+        // ぴったり撃破！
+        locked = true;
+        updateHpUI();
+        score++;
+        if (playMode === 'time' && score > getBest()) {
+          setBest(score);
+        }
+        updateHud();
+        playWinSfx();
+        spawnConfetti();
+        showBanner('✨ ぴったり撃破！', 'win');
+        spriteEl.classList.add('defeated');
+        setTimeout(() => {
+          if (playMode === 'time' && timeLeft <= 0) return;
+          nextMonster();
+        }, 580);
+      } else if (hp < 0) {
+        // やりすぎ（オーバーダメージ）→少し回復して調整し直す
+        overCount++;
+        const rebound = Math.abs(hp) + (diff === 'easy' ? 3 : diff === 'normal' ? 5 : 7);
+        hp = Math.min(maxHp, rebound);
+        playOverSfx();
+        showBanner('💦 やりすぎ！かいふく', 'over');
+        spawnDamagePop('かいふく!', true);
+        updateHpUI();
+      } else {
+        updateHpUI();
+      }
+    }
+
+    function resetGame() {
+      clearInterval(timerId);
+      timerId = null;
+      timerStarted = false;
+      timeLeft = 60;
+      score = 0;
+      taps = 0;
+      overCount = 0;
+      overlayEl.classList.remove('show');
+      renderButtons();
+      updateHud();
+      nextMonster();
+    }
+
+    $('diff-group').addEventListener('click', e => {
+      const btn = e.target.closest('.mode-chip');
+      if (!btn) return;
+      diff = btn.dataset.diff;
+      document.querySelectorAll('#diff-group .mode-chip').forEach(c => c.classList.toggle('active', c === btn));
+      resetGame();
+    });
+
+    $('play-group').addEventListener('click', e => {
+      const btn = e.target.closest('.mode-chip');
+      if (!btn) return;
+      playMode = btn.dataset.play;
+      document.querySelectorAll('#play-group .mode-chip').forEach(c => c.classList.toggle('active', c === btn));
+      resetGame();
+    });
+
+    $('sound-btn').addEventListener('click', () => {
+      soundOn = !soundOn;
+      const b = $('sound-btn');
+      b.textContent = soundOn ? '🎵 ON' : '🔇 OFF';
+      b.classList.toggle('sound-on', soundOn);
+      if (soundOn) playTone(660, 0.08, 'triangle', 0.14);
+    });
+
+    $('retry-btn').addEventListener('click', resetGame);
+
+    resetGame();
+  </script>
+</body>
+</html>
