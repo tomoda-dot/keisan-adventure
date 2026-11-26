@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>くらべっこ！ ＞ ＝ ＜ | けいさんアドベンチャー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pri: #43a047;
+      --pri-dark: #2e7d32;
+      --text: #2d3436;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: #f1f8e9;
+      color: var(--text);
+    }
+
+    .wrap {
+      height: 100dvh;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* 単色メインバー */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      margin: 0 -14px;
+      padding: 10px 14px;
+      background: var(--pri);
+      box-shadow: 0 3px 0 var(--pri-dark);
+    }
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+    }
+    .pill-btn:active { transform: translateY(2px); }
+    .pill-btn.sound-on { background: #fff8e1; color: #ef6c00; }
+
+    .game-title {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4vw, 24px);
+      color: #fff;
+      text-shadow: 0 2px 0 var(--pri-dark);
+      white-space: nowrap;
+    }
+
+    /* HUD */
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .hud-box {
+      background: #fff;
+      border: 2.5px solid #c8e6c9;
+      border-radius: 16px;
+      padding: 7px 10px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .hud-lbl { font-size: 11px; font-weight: 800; color: #689f38; }
+    .hud-val { font-size: clamp(18px, 4vw, 24px); font-weight: 900; color: #2e7d32; font-variant-numeric: tabular-nums; }
+    .hud-box.time .hud-val { color: #0288d1; }
+    .hud-box.best .hud-val { color: #ef6c00; }
+
+    /* Arena */
+    .arena {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .question-board {
+      width: 100%;
+      background: #fff;
+      border: 4px solid #a5d6a7;
+      border-radius: 26px;
+      padding: 24px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 3vw, 22px);
+      box-shadow: 0 10px 24px rgba(46, 125, 50, 0.1);
+      position: relative;
+      min-height: 150px;
+    }
+    .side-box {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+    }
+    .side-expr {
+      font-size: clamp(26px, 6.5vw, 46px);
+      font-weight: 900;
+      color: #2d3436;
+      line-height: 1.2;
+      word-break: keep-all;
+    }
+    .side-val-hint {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0288d1;
+      min-height: 20px;
+      margin-top: 4px;
+    }
+
+    .mid-slot {
+      width: clamp(64px, 15vw, 88px);
+      height: clamp(64px, 15vw, 88px);
+      border-radius: 20px;
+      border: 3.5px dashed #81c784;
+      background: #f9fbe7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(32px, 8vw, 48px);
+      font-weight: 900;
+      color: #689f38;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .mid-slot.ok {
+      border-style: solid;
+      border-color: #2e7d32;
+      background: #c8e6c9;
+      color: #1b5e20;
+      transform: scale(1.08);
+    }
+    .mid-slot.ng {
+      border-style: solid;
+      border-color: #e53935;
+      background: #ffcdd2;
+      color: #b71c1c;
+      animation: shake 0.3s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .feedback-banner {
+      min-height: 30px;
+      font-size: 18px;
+      font-weight: 900;
+      text-align: center;
+    }
+    .feedback-banner.ok { color: #2e7d32; }
+    .feedback-banner.ng { color: #d32f2f; }
+
+    /* 3つの大きな回答ボタン */
+    .choice-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .choice-btn {
+      padding: 18px 8px 14px;
+      border-radius: 22px;
+      border: 3px solid #fff;
+      font-family: inherit;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: transform 0.1s;
+    }
+    .choice-btn:active { transform: translateY(4px); }
+    .choice-sym { font-size: clamp(34px, 8vw, 48px); font-weight: 900; line-height: 1; }
+    .choice-sub { font-size: 11.5px; font-weight: 800; opacity: 0.95; }
+    .btn-gt { background: #ff7043; box-shadow: 0 6px 0 #d84315; }
+    .btn-eq { background: #29b6f6; box-shadow: 0 6px 0 #0277bd; }
+    .btn-lt { background: #ab47bc; box-shadow: 0 6px 0 #6a1b9a; }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(38, 50, 56, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .overlay.hidden { display: none; }
+    .modal-card {
+      background: #fff;
+      border: 4px solid #a5d6a7;
+      border-radius: 28px;
+      padding: 24px 20px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+    }
+    .modal-h {
+      font-family: 'Potta One', cursive;
+      font-size: 26px;
+      color: var(--pri-dark);
+      margin-bottom: 8px;
+    }
+    .modal-p { font-size: 13.5px; font-weight: 700; color: #546e7a; line-height: 1.55; margin-bottom: 14px; }
+
+    .opt-group { text-align: left; margin-bottom: 14px; }
+    .opt-lbl { font-size: 12px; font-weight: 900; color: #33691e; margin-bottom: 6px; display: block; }
+    .opt-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .opt-btn {
+      padding: 9px 6px;
+      border-radius: 12px;
+      border: 2px solid #c8e6c9;
+      background: #f9fbe7;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #33691e;
+      cursor: pointer;
+    }
+    .opt-btn.active {
+      background: var(--pri);
+      border-color: var(--pri-dark);
+      color: #fff;
+    }
+
+    .big-btn {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 18px;
+      border: none;
+      background: var(--pri);
+      color: #fff;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--pri-dark);
+      margin-top: 6px;
+    }
+    .big-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--pri-dark); }
+    .sub-btn {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 2px solid #c8e6c9;
+      background: #fff;
+      color: var(--pri-dark);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 10px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .res-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0 14px;
+    }
+    .res-box {
+      background: #f1f8e9;
+      border: 2px solid #c8e6c9;
+      border-radius: 14px;
+      padding: 10px 6px;
+    }
+    .res-lbl { font-size: 11px; font-weight: 800; color: #558b2f; }
+    .res-val { font-size: 22px; font-weight: 900; color: #1b5e20; }
+    .new-rec {
+      display: inline-block;
+      background: #ffca28;
+      color: #4e342e;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 3px 14px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="wrap">
+    <div class="top-bar">
+      <a href="index.html" class="pill-btn">🏠 TOP</a>
+      <h1 class="game-title">くらべっこ！ ＞ ＝ ＜</h1>
+      <div style="display:flex;gap:6px;">
+        <button id="btn-guide" class="pill-btn" onclick="toggleGuide()">💬 ガイドON</button>
+        <button id="btn-sound" class="pill-btn sound-on" onclick="toggleSound()">🎵 ON</button>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="hud-box">
+        <div class="hud-lbl" id="lbl-score">せいかい</div>
+        <div class="hud-val" id="hud-score">0</div>
+      </div>
+      <div class="hud-box time">
+        <div class="hud-lbl" id="lbl-time">のこり時間</div>
+        <div class="hud-val" id="hud-time">30びょう</div>
+      </div>
+      <div class="hud-box best">
+        <div class="hud-lbl">ハイスコア</div>
+        <div class="hud-val" id="hud-best">0</div>
+      </div>
+    </div>
+
+    <main class="arena">
+      <div class="question-board">
+        <div class="side-box">
+          <div class="side-expr" id="left-expr">?</div>
+          <div class="side-val-hint" id="left-hint"></div>
+        </div>
+        <div class="mid-slot" id="mid-slot">？</div>
+        <div class="side-box">
+          <div class="side-expr" id="right-expr">?</div>
+          <div class="side-val-hint" id="right-hint"></div>
+        </div>
+      </div>
+
+      <div class="feedback-banner" id="feedback"></div>
+
+      <div class="choice-row">
+        <button class="choice-btn btn-gt" onclick="answer('>')">
+          <span class="choice-sym">＞</span>
+          <span class="choice-sub guide-txt">ひだりが おおきい</span>
+        </button>
+        <button class="choice-btn btn-eq" onclick="answer('=')">
+          <span class="choice-sym">＝</span>
+          <span class="choice-sub guide-txt">おなじ</span>
+        </button>
+        <button class="choice-btn btn-lt" onclick="answer('<')">
+          <span class="choice-sym">＜</span>
+          <span class="choice-sub guide-txt">みぎが おおきい</span>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Start Modal -->
+  <div class="overlay" id="start-overlay">
+    <div class="modal-card">
+      <div style="font-size:48px;margin-bottom:4px;">⚖️</div>
+      <h2 class="modal-h">くらべっこ！ ＞ ＝ ＜</h2>
+      <p class="modal-p">ひだりと みぎを くらべて、まんなかに はいる <b>「＞」「＝」「＜」</b> を タップしよう！</p>
+
+      <div class="opt-group">
+        <span class="opt-lbl">むずかしさ</span>
+        <div class="opt-btns" id="diff-btns">
+          <button class="opt-btn active" data-val="easy" onclick="setDiff('easy')">かんたん<br><small>1〜20</small></button>
+          <button class="opt-btn" data-val="normal" onclick="setDiff('normal')">ふつう<br><small>1〜100・かたほう式</small></button>
+          <button class="opt-btn" data-val="hard" onclick="setDiff('hard')">むずかしい<br><small>りょうほう式</small></button>
+        </div>
+      </div>
+
+      <div class="opt-group">
+        <span class="opt-lbl">モード</span>
+        <div class="opt-btns" id="mode-btns">
+          <button class="opt-btn active" data-val="30" onclick="setTimeMode('30')">30びょう</button>
+          <button class="opt-btn" data-val="60" onclick="setTimeMode('60')">60びょう</button>
+          <button class="opt-btn" data-val="practice" onclick="setTimeMode('practice')">れんしゅう<br><small>(10もん)</small></button>
+        </div>
+      </div>
+
+      <button class="big-btn" onclick="startGame()">▶ スタート！</button>
+      <a href="index.html" class="sub-btn">🏠 TOPページへもどる</a>
+    </div>
+  </div>
+
+  <!-- Result Modal -->
+  <div class="overlay hidden" id="result-overlay">
+    <div class="modal-card">
+      <div style="font-size:50px;margin-bottom:4px;">🏆</div>
+      <h2 class="modal-h">おわり！ おつかれさま</h2>
+      <div id="res-new-rec" class="new-rec" style="display:none;">🎉 ハイスコア こうしん！</div>
+      <div class="res-grid">
+        <div class="res-box">
+          <div class="res-lbl">せいかい数</div>
+          <div class="res-val" id="res-correct">0</div>
+        </div>
+        <div class="res-box">
+          <div class="res-lbl">せいかい率</div>
+          <div class="res-val" id="res-rate">0%</div>
+        </div>
+        <div class="res-box">
+          <div class="res-lbl">ハイスコア</div>
+          <div class="res-val" id="res-best">0</div>
+        </div>
+      </div>
+      <button class="big-btn" onclick="startGame()">🔄 もういちど あそぶ</button>
+      <button class="sub-btn" onclick="openSetup()">⚙️ むずかしさを かえる</button>
+      <a href="index.html" class="sub-btn">🏠 TOPページへもどる</a>
+    </div>
+  </div>
+
+  <script>
+    const BEST_KEY = 'COMPARE_GAME_BEST_V1';
+    let diff = 'easy';
+    let timeMode = '30'; // '30', '60', 'practice'
+    let soundOn = true;
+    let showGuide = true;
+
+    let score = 0;
+    let totalAnswered = 0;
+    let timeLeft = 30;
+    let timerId = null;
+    let isPlaying = false;
+    let isLocked = false;
+    let currentQ = null;
+    let bestMap = {};
+    try { bestMap = JSON.parse(localStorage.getItem(BEST_KEY) || '{}'); } catch(e) {}
+
+    // ─── Web Audio 効果音 ────────────────────────
+    class Sfx {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AC();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      tone(freq, dur, type = 'triangle', vol = 0.2, delay = 0) {
+        if (!soundOn) return;
+        this.init();
+        const t = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + dur);
+      }
+      correct() {
+        this.tone(659.25, 0.1, 'triangle', 0.22, 0);
+        this.tone(880.00, 0.18, 'triangle', 0.24, 0.08);
+      }
+      wrong() {
+        this.tone(200, 0.14, 'sawtooth', 0.14, 0);
+        this.tone(160, 0.2, 'sawtooth', 0.12, 0.1);
+      }
+      finish() {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.22, 'triangle', 0.22, i * 0.09));
+      }
+    }
+    const sfx = new Sfx();
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      const btn = document.getElementById('btn-sound');
+      btn.textContent = soundOn ? '🎵 ON' : '🔇 OFF';
+      btn.classList.toggle('sound-on', soundOn);
+    }
+
+    function toggleGuide() {
+      showGuide = !showGuide;
+      document.getElementById('btn-guide').textContent = showGuide ? '💬 ガイドON' : '🙈 ガイドOFF';
+      document.querySelectorAll('.guide-txt').forEach(el => {
+        el.style.display = showGuide ? 'block' : 'none';
+      });
+    }
+
+    function setDiff(d) {
+      diff = d;
+      document.querySelectorAll('#diff-btns .opt-btn').forEach(b => b.classList.toggle('active', b.dataset.val === d));
+      updateBestHud();
+    }
+
+    function setTimeMode(m) {
+      timeMode = m;
+      document.querySelectorAll('#mode-btns .opt-btn').forEach(b => b.classList.toggle('active', b.dataset.val === m));
+      updateBestHud();
+    }
+
+    function bestKey() { return diff + '_' + timeMode; }
+
+    function updateBestHud() {
+      document.getElementById('hud-best').textContent = bestMap[bestKey()] || 0;
+    }
+
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function makeSimpleExpr(targetVal) {
+      // targetVal を作る足し算または引き算の式を1つ生成
+      if (targetVal >= 2 && Math.random() < 0.55) {
+        const a = randInt(1, targetVal - 1);
+        const b = targetVal - a;
+        return { text: `${a} ＋ ${b}`, val: targetVal };
+      }
+      const b = randInt(1, 15);
+      return { text: `${targetVal + b} － ${b}`, val: targetVal };
+    }
+
+    function generateQuestion() {
+      let left, right;
+      const wantEqual = Math.random() < 0.25; // 25%の確率で「＝」を出題
+
+      if (diff === 'easy') {
+        const a = randInt(1, 20);
+        const b = wantEqual ? a : randInt(1, 20);
+        left = { text: String(a), val: a, isExpr: false };
+        right = { text: String(b), val: b, isExpr: false };
+      } else if (diff === 'normal') {
+        const base = randInt(5, 60);
+        const other = wantEqual ? base : Math.max(1, base + randInt(-12, 12));
+        if (Math.random() < 0.3) {
+          // 数字同士（1〜100）
+          const a = randInt(1, 100);
+          const b = wantEqual ? a : randInt(1, 100);
+          left = { text: String(a), val: a, isExpr: false };
+          right = { text: String(b), val: b, isExpr: false };
+        } else if (Math.random() < 0.5) {
+          const ex = makeSimpleExpr(base);
+          left = { text: ex.text, val: ex.val, isExpr: true };
+          right = { text: String(other), val: other, isExpr: false };
+        } else {
+          const ex = makeSimpleExpr(other);
+          left = { text: String(base), val: base, isExpr: false };
+          right = { text: ex.text, val: ex.val, isExpr: true };
+        }
+      } else {
+        // hard: 両方計算式
+        const v1 = randInt(5, 45);
+        const v2 = wantEqual ? v1 : Math.max(2, v1 + randInt(-8, 8));
+        const e1 = makeSimpleExpr(v1);
+        const e2 = makeSimpleExpr(v2);
+        left = { text: e1.text, val: e1.val, isExpr: true };
+        right = { text: e2.text, val: e2.val, isExpr: true };
+      }
+
+      const ans = left.val > right.val ? '>' : (left.val < right.val ? '<' : '=');
+      return { left, right, ans };
+    }
+
+    function showNextQuestion() {
+      isLocked = false;
+      currentQ = generateQuestion();
+      document.getElementById('left-expr').textContent = currentQ.left.text;
+      document.getElementById('right-expr').textContent = currentQ.right.text;
+      document.getElementById('left-hint').textContent = '';
+      document.getElementById('right-hint').textContent = '';
+      const slot = document.getElementById('mid-slot');
+      slot.className = 'mid-slot';
+      slot.textContent = '？';
+      const fb = document.getElementById('feedback');
+      fb.className = 'feedback-banner';
+      fb.textContent = '';
+    }
+
+    function startGame() {
+      stopConfetti();
+      document.getElementById('start-overlay').classList.add('hidden');
+      document.getElementById('result-overlay').classList.add('hidden');
+
+      score = 0;
+      totalAnswered = 0;
+      isPlaying = true;
+      updateBestHud();
+      document.getElementById('hud-score').textContent = '0';
+
+      if (timerId) clearInterval(timerId);
+      if (timeMode === 'practice') {
+        document.getElementById('lbl-time').textContent = 'もんだい';
+        document.getElementById('hud-time').textContent = '1 / 10';
+      } else {
+        timeLeft = Number(timeMode);
+        document.getElementById('lbl-time').textContent = 'のこり時間';
+        document.getElementById('hud-time').textContent = timeLeft + 'びょう';
+        timerId = setInterval(() => {
+          timeLeft--;
+          document.getElementById('hud-time').textContent = timeLeft + 'びょう';
+          if (timeLeft <= 0) {
+            finishGame();
+          }
+        }, 1000);
+      }
+      showNextQuestion();
+    }
+
+    function answer(sym) {
+      if (!isPlaying || isLocked) return;
+      isLocked = true;
+      totalAnswered++;
+
+      const isCorrect = (sym === currentQ.ans);
+      const slot = document.getElementById('mid-slot');
+      const fb = document.getElementById('feedback');
+
+      if (currentQ.left.isExpr) document.getElementById('left-hint').textContent = `= ${currentQ.left.val}`;
+      if (currentQ.right.isExpr) document.getElementById('right-hint').textContent = `= ${currentQ.right.val}`;
+
+      if (isCorrect) {
+        score++;
+        document.getElementById('hud-score').textContent = score;
+        slot.className = 'mid-slot ok';
+        slot.textContent = sym;
+        fb.className = 'feedback-banner ok';
+        fb.textContent = '⭕ せいかい！';
+        sfx.correct();
+      } else {
+        slot.className = 'mid-slot ng';
+        slot.textContent = currentQ.ans;
+        fb.className = 'feedback-banner ng';
+        fb.textContent = `❌ ざんねん！ せいかいは「${currentQ.ans}」`;
+        sfx.wrong();
+      }
+
+      setTimeout(() => {
+        if (!isPlaying) return;
+        if (timeMode === 'practice') {
+          if (totalAnswered >= 10) {
+            finishGame();
+            return;
+          }
+          document.getElementById('hud-time').textContent = `${totalAnswered + 1} / 10`;
+        }
+        showNextQuestion();
+      }, isCorrect ? 420 : 950);
+    }
+
+    function finishGame() {
+      isPlaying = false;
+      if (timerId) { clearInterval(timerId); timerId = null; }
+      sfx.finish();
+
+      const rate = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
+      const key = bestKey();
+      const prev = bestMap[key] || 0;
+      const isNew = score > prev;
+      if (isNew) {
+        bestMap[key] = score;
+        try { localStorage.setItem(BEST_KEY, JSON.stringify(bestMap)); } catch(e) {}
+      }
+      updateBestHud();
+
+      document.getElementById('res-correct').textContent = score + 'もん';
+      document.getElementById('res-rate').textContent = rate + '%';
+      document.getElementById('res-best').textContent = (bestMap[key] || 0) + 'もん';
+      document.getElementById('res-new-rec').style.display = isNew ? 'inline-block' : 'none';
+      document.getElementById('result-overlay').classList.remove('hidden');
+      if (score > 0) startConfetti();
+    }
+
+    function openSetup() {
+      stopConfetti();
+      document.getElementById('result-overlay').classList.add('hidden');
+      document.getElementById('start-overlay').classList.remove('hidden');
+    }
+
+    // Confetti
+    let confettiPieces = [], confettiRaf = null;
+    function startConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#43a047', '#ff7043', '#29b6f6', '#ffd54f', '#ab47bc'];
+      confettiPieces = Array.from({ length: 90 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        w: 8 + Math.random() * 8,
+        h: 6 + Math.random() * 6,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        vy: 2.5 + Math.random() * 3.5,
+        vx: (Math.random() - 0.5) * 2,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.2
+      }));
+      const loop = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confettiPieces.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+          if (p.y > canvas.height + 20) { p.y = -20; p.x = Math.random() * canvas.width; }
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+          ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+        });
+        confettiRaf = requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    function stopConfetti() {
+      if (confettiRaf) cancelAnimationFrame(confettiRaf);
+      confettiRaf = null;
+      const c = document.getElementById('confetti-canvas');
+      c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    }
+
+    updateBestHud();
+  </script>
+</body>
+</html>
