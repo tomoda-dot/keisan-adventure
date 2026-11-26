@@ -586,11 +586,25 @@
       ).join('');
     }
 
+    function addAdventureCoins(earnedCoins, solvedDelta = 0) {
+      try {
+        const raw = localStorage.getItem('KEISAN_ADVENTURE_SAVE_V1');
+        const st = raw ? JSON.parse(raw) : { coins: 0, stars: 0, totalSolved: 0 };
+        st.coins = (st.coins || 0) + earnedCoins;
+        if (solvedDelta > 0) st.totalSolved = (st.totalSolved || 0) + solvedDelta;
+        localStorage.setItem('KEISAN_ADVENTURE_SAVE_V1', JSON.stringify(st));
+        return st.coins;
+      } catch (e) { return 0; }
+    }
+
     function checkBalance() {
       const rightTotal = rightBaseVal + addedWeights.reduce((s, w) => s + w.val, 0);
       if (rightTotal === leftVal) {
         isCleared = true;
         score++;
+        const earned = diff === 'easy' ? 3 : diff === 'normal' ? 5 : 8;
+        addAdventureCoins(earned, 1);
+        document.getElementById('status-msg').textContent = `✨ ぴったり！ 🪙 +${earned}コイン！`;
         document.getElementById('hud-score').textContent = score + 'もん';
         sfx.clear();
         startConfetti();

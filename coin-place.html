@@ -768,6 +768,17 @@
       cancelAnimationFrame(timerRaf);
     }
 
+    function addAdventureCoins(earnedCoins, solvedDelta = 0) {
+      try {
+        const raw = localStorage.getItem('KEISAN_ADVENTURE_SAVE_V1');
+        const st = raw ? JSON.parse(raw) : { coins: 0, stars: 0, totalSolved: 0 };
+        st.coins = (st.coins || 0) + earnedCoins;
+        if (solvedDelta > 0) st.totalSolved = (st.totalSolved || 0) + solvedDelta;
+        localStorage.setItem('KEISAN_ADVENTURE_SAVE_V1', JSON.stringify(st));
+        return st.coins;
+      } catch (e) { return 0; }
+    }
+
     function nextOtsukaiTarget() {
       let next;
       do {
@@ -819,19 +830,22 @@
           localStorage.setItem(BEST_TIME_KEY, String(best));
         }
 
+        addAdventureCoins(20, 1);
+
         setTimeout(() => {
           $('res-title').textContent = '👑 100の宝箱 かんせい！';
           $('res-big').textContent = secStr + 'びょう';
-          $('res-sub').textContent = `ベストタイム: ${(best / 1000).toFixed(2)}びょう`;
+          $('res-sub').textContent = `ベスト: ${(best / 1000).toFixed(2)}びょう / 🪙 +20コイン ゲット！`;
           overlayEl.classList.add('show');
         }, 420);
       } else if (mode === 'otsukai') {
         if (total === target) {
           locked = true;
           clearedCount++;
+          addAdventureCoins(5, 1);
           playWinSfx();
           spawnConfetti();
-          showToast(`🎉 ${target} ぴったりクリア！`);
+          showToast(`🎉 ${target} クリア！ 🪙+5`);
           setTimeout(nextOtsukaiTarget, 900);
         } else if (total > target) {
           showToast('💦 やりすぎ！「-1」でもどそう');
@@ -847,9 +861,10 @@
       if (mode === 'otsukai' && total === target) {
         locked = true;
         clearedCount++;
+        addAdventureCoins(5, 1);
         playWinSfx();
         spawnConfetti();
-        showToast(`🎉 ${target} ぴったりクリア！`);
+        showToast(`🎉 ${target} クリア！ 🪙+5`);
         setTimeout(nextOtsukaiTarget, 900);
       }
     }

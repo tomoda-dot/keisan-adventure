@@ -859,18 +859,31 @@
       rafId = requestAnimationFrame(gameLoop);
     }
 
+    function addAdventureCoins(earnedCoins, solvedDelta = 0) {
+      try {
+        const raw = localStorage.getItem('KEISAN_ADVENTURE_SAVE_V1');
+        const st = raw ? JSON.parse(raw) : { coins: 0, stars: 0, totalSolved: 0 };
+        st.coins = (st.coins || 0) + earnedCoins;
+        if (solvedDelta > 0) st.totalSolved = (st.totalSolved || 0) + solvedDelta;
+        localStorage.setItem('KEISAN_ADVENTURE_SAVE_V1', JSON.stringify(st));
+        return st.coins;
+      } catch (e) { return 0; }
+    }
+
     function finishGame() {
       running = false;
       clearInterval(timerId);
       timerId = null;
       cancelAnimationFrame(rafId);
       if (score > getBest()) setBest(score);
+      const earned = hits > 0 ? Math.max(3, hits) : 0;
+      if (earned > 0) addAdventureCoins(earned, hits);
       updateHud();
       playFinishSfx();
       $('res-score').textContent = score + 'てん';
       $('res-best').textContent = getBest() + 'てん';
       $('res-combo').textContent = maxCombo;
-      $('res-hits').textContent = hits + 'こ';
+      $('res-hits').textContent = earned > 0 ? `${hits}こ (🪙+${earned})` : hits + 'こ';
       overlayEl.classList.add('show');
     }
 

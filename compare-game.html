@@ -415,6 +415,7 @@
       <div style="font-size:50px;margin-bottom:4px;">🏆</div>
       <h2 class="modal-h">おわり！ おつかれさま</h2>
       <div id="res-new-rec" class="new-rec" style="display:none;">🎉 ハイスコア こうしん！</div>
+      <div id="res-coins" style="font-size:16px;font-weight:900;color:#ef6c00;margin-bottom:10px;"></div>
       <div class="res-grid">
         <div class="res-box">
           <div class="res-lbl">せいかい数</div>
@@ -437,6 +438,16 @@
 
   <script>
     const BEST_KEY = 'COMPARE_GAME_BEST_V1';
+    function addAdventureCoins(earnedCoins, solvedDelta = 0) {
+      try {
+        const raw = localStorage.getItem('KEISAN_ADVENTURE_SAVE_V1');
+        const st = raw ? JSON.parse(raw) : { coins: 0, stars: 0, totalSolved: 0 };
+        st.coins = (st.coins || 0) + earnedCoins;
+        if (solvedDelta > 0) st.totalSolved = (st.totalSolved || 0) + solvedDelta;
+        localStorage.setItem('KEISAN_ADVENTURE_SAVE_V1', JSON.stringify(st));
+        return st.coins;
+      } catch (e) { return 0; }
+    }
     let diff = 'easy';
     let timeMode = '30'; // '30', '60', 'practice'
     let soundOn = true;
@@ -681,10 +692,14 @@
       }
       updateBestHud();
 
+      const earned = score * 2;
+      if (earned > 0) addAdventureCoins(earned, score);
+
       document.getElementById('res-correct').textContent = score + 'もん';
       document.getElementById('res-rate').textContent = rate + '%';
       document.getElementById('res-best').textContent = (bestMap[key] || 0) + 'もん';
       document.getElementById('res-new-rec').style.display = isNew ? 'inline-block' : 'none';
+      document.getElementById('res-coins').textContent = earned > 0 ? `🪙 +${earned}コイン ゲット！` : '';
       document.getElementById('result-overlay').classList.remove('hidden');
       if (score > 0) startConfetti();
     }

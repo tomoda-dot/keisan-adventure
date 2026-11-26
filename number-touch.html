@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ナンバータッチ！1〜80 | けいさんアドベンチャー</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --bg1: #fff0f6;
@@ -20,8 +22,17 @@
       --mint: #69f0ae;
       --text: #3d2c2e;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
-    html, body {
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html,
+    body {
       height: 100%;
       overflow: hidden;
       font-family: 'M PLUS Rounded 1c', sans-serif;
@@ -51,6 +62,7 @@
       background: #ff6b9d;
       box-shadow: 0 3px 0 #e0487b;
     }
+
     .pill-btn {
       display: inline-flex;
       align-items: center;
@@ -65,11 +77,29 @@
       font-size: 13px;
       text-decoration: none;
       cursor: pointer;
-      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
       transition: transform 0.1s;
     }
-    .pill-btn:active { transform: translateY(2px); }
-    .pill-btn.sound-on { background: #fff3e0; border-color: #fff; color: #e65100; }
+
+    .pill-btn:active {
+      transform: translateY(2px);
+    }
+
+    .pill-btn.sound-on {
+      background: #fff3e0;
+      border-color: #fff;
+      color: #e65100;
+    }
+
+    .pill-btn:active {
+      transform: translateY(2px);
+    }
+
+    .pill-btn.sound-on {
+      background: #fff3e0;
+      border-color: #ffb74d;
+      color: #e65100;
+    }
 
     .game-title {
       font-family: 'Potta One', cursive;
@@ -87,18 +117,36 @@
       gap: 8px;
       flex-shrink: 0;
     }
+
     .hud-box {
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.9);
       border: 2.5px solid #ffd1e3;
       border-radius: 16px;
       padding: 6px 10px;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(255,107,157,0.12);
+      box-shadow: 0 4px 10px rgba(255, 107, 157, 0.12);
     }
-    .hud-lbl { font-size: 10.5px; font-weight: 800; color: #8d6e63; }
-    .hud-val { font-size: clamp(17px, 3.6vw, 22px); font-weight: 900; color: #d81b60; font-variant-numeric: tabular-nums; }
-    .hud-box.timer .hud-val { color: #0288d1; }
-    .hud-box.best .hud-val { color: #ef6c00; }
+
+    .hud-lbl {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #8d6e63;
+    }
+
+    .hud-val {
+      font-size: clamp(17px, 3.6vw, 22px);
+      font-weight: 900;
+      color: #d81b60;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-box.timer .hud-val {
+      color: #0288d1;
+    }
+
+    .hud-box.best .hud-val {
+      color: #ef6c00;
+    }
 
     /* Mode Selector Bar */
     .mode-bar {
@@ -108,19 +156,21 @@
       flex-wrap: wrap;
       flex-shrink: 0;
     }
+
     .mode-chip {
       padding: 5px 10px;
       border-radius: 999px;
       border: 2px solid #fff;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255, 255, 255, 0.8);
       font-family: inherit;
       font-size: 11.5px;
       font-weight: 800;
       color: #5d4037;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
       transition: all 0.12s;
     }
+
     .mode-chip.active {
       background: #ff4081;
       color: #fff;
@@ -136,14 +186,15 @@
       justify-content: center;
       position: relative;
     }
+
     .board {
       display: grid;
       gap: var(--cell-gap, 6px);
       padding: 10px;
-      background: rgba(255,255,255,0.72);
+      background: rgba(255, 255, 255, 0.72);
       border: 4px solid #fff;
       border-radius: 24px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
       max-width: 100%;
       max-height: 100%;
     }
@@ -161,30 +212,65 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.16);
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.16);
       transition: transform 0.1s, opacity 0.18s;
       position: relative;
     }
-    .num-cell:active { transform: translateY(3px) scale(0.95); box-shadow: 0 1px 0 rgba(0,0,0,0.16); }
 
-    .c-0 { background: linear-gradient(180deg, #ff80ab 0%, #ff4081 100%); box-shadow: 0 4px 0 #c51162; }
-    .c-1 { background: linear-gradient(180deg, #4fc3f7 0%, #03a9f4 100%); box-shadow: 0 4px 0 #0277bd; }
-    .c-2 { background: linear-gradient(180deg, #ffb74d 0%, #ff9800 100%); box-shadow: 0 4px 0 #e65100; }
-    .c-3 { background: linear-gradient(180deg, #81c784 0%, #4caf50 100%); box-shadow: 0 4px 0 #2e7d32; }
-    .c-4 { background: linear-gradient(180deg, #ba68c8 0%, #9c27b0 100%); box-shadow: 0 4px 0 #6a1b9a; }
+    .num-cell:active {
+      transform: translateY(3px) scale(0.95);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
+    }
+
+    .c-0 {
+      background: linear-gradient(180deg, #ff80ab 0%, #ff4081 100%);
+      box-shadow: 0 4px 0 #c51162;
+    }
+
+    .c-1 {
+      background: linear-gradient(180deg, #4fc3f7 0%, #03a9f4 100%);
+      box-shadow: 0 4px 0 #0277bd;
+    }
+
+    .c-2 {
+      background: linear-gradient(180deg, #ffb74d 0%, #ff9800 100%);
+      box-shadow: 0 4px 0 #e65100;
+    }
+
+    .c-3 {
+      background: linear-gradient(180deg, #81c784 0%, #4caf50 100%);
+      box-shadow: 0 4px 0 #2e7d32;
+    }
+
+    .c-4 {
+      background: linear-gradient(180deg, #ba68c8 0%, #9c27b0 100%);
+      box-shadow: 0 4px 0 #6a1b9a;
+    }
 
     .num-cell.cleared {
       opacity: 0;
       pointer-events: none;
       transform: scale(1.25);
     }
+
     .num-cell.wrong {
       animation: shake 0.3s ease;
     }
+
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px) rotate(-3deg); }
-      75% { transform: translateX(5px) rotate(3deg); }
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px) rotate(-3deg);
+      }
+
+      75% {
+        transform: translateX(5px) rotate(3deg);
+      }
     }
 
     /* Overlay Screens */
@@ -199,7 +285,11 @@
       padding: 18px;
       z-index: 50;
     }
-    .overlay.hidden { display: none; }
+
+    .overlay.hidden {
+      display: none;
+    }
+
     .modal-card {
       background: linear-gradient(180deg, #ffffff 0%, #fff8fb 100%);
       border: 4px solid #ffb2d0;
@@ -208,21 +298,42 @@
       max-width: 420px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
       animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
+
     @keyframes popIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
-    .modal-emoji { font-size: 52px; margin-bottom: 6px; }
+
+    .modal-emoji {
+      font-size: 52px;
+      margin-bottom: 6px;
+    }
+
     .modal-h {
       font-family: 'Potta One', cursive;
       font-size: 26px;
       color: #ff4081;
       margin-bottom: 8px;
     }
-    .modal-p { font-size: 14px; font-weight: 700; color: #5d4037; line-height: 1.6; margin-bottom: 16px; }
+
+    .modal-p {
+      font-size: 14px;
+      font-weight: 700;
+      color: #5d4037;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
     .result-time {
       font-size: 38px;
       font-weight: 900;
@@ -230,6 +341,7 @@
       margin: 6px 0;
       font-variant-numeric: tabular-nums;
     }
+
     .new-rec {
       display: inline-block;
       background: #ffca28;
@@ -241,7 +353,16 @@
       margin-bottom: 12px;
       animation: pulse 0.8s infinite alternate;
     }
-    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
+
+    @keyframes pulse {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.08);
+      }
+    }
 
     .big-btn {
       width: 100%;
@@ -257,7 +378,12 @@
       box-shadow: 0 5px 0 #c51162;
       margin-top: 8px;
     }
-    .big-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #c51162; }
+
+    .big-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #c51162;
+    }
+
     .sub-btn {
       width: 100%;
       padding: 10px 16px;
@@ -283,6 +409,7 @@
     }
   </style>
 </head>
+
 <body>
   <canvas id="confetti-canvas"></canvas>
 
@@ -353,12 +480,22 @@
 
   <script>
     const BEST_KEY = 'NUMBER_TOUCH_BEST_V1';
+    function addAdventureCoins(earnedCoins, solvedDelta = 0) {
+      try {
+        const raw = localStorage.getItem('KEISAN_ADVENTURE_SAVE_V1');
+        const st = raw ? JSON.parse(raw) : { coins: 0, stars: 0, totalSolved: 0 };
+        st.coins = (st.coins || 0) + earnedCoins;
+        if (solvedDelta > 0) st.totalSolved = (st.totalSolved || 0) + solvedDelta;
+        localStorage.setItem('KEISAN_ADVENTURE_SAVE_V1', JSON.stringify(st));
+        return st.coins;
+      } catch (e) { return 0; }
+    }
     const MODES = {
-      '5x5_seq':    { cols: 5,  rows: 5,  count: 25, maxNum: 25, label: '5×5 (1〜25)' },
-      '5x5_rand80': { cols: 5,  rows: 5,  count: 25, maxNum: 80, label: '5×5 (1〜80から25個)' },
-      '7x7_seq':    { cols: 7,  rows: 7,  count: 49, maxNum: 49, label: '7×7 (1〜49)' },
-      '7x7_rand80': { cols: 7,  rows: 7,  count: 49, maxNum: 80, label: '7×7 (1〜80から49個)' },
-      '8x10_80':    { cols: 10, rows: 8,  count: 80, maxNum: 80, label: 'ぜんぶ (1〜80)' }
+      '5x5_seq': { cols: 5, rows: 5, count: 25, maxNum: 25, label: '5×5 (1〜25)' },
+      '5x5_rand80': { cols: 5, rows: 5, count: 25, maxNum: 80, label: '5×5 (1〜80から25個)' },
+      '7x7_seq': { cols: 7, rows: 7, count: 49, maxNum: 49, label: '7×7 (1〜49)' },
+      '7x7_rand80': { cols: 7, rows: 7, count: 49, maxNum: 80, label: '7×7 (1〜80から49個)' },
+      '8x10_80': { cols: 10, rows: 8, count: 80, maxNum: 80, label: 'ぜんぶ (1〜80)' }
     };
 
     let currentMode = '5x5_rand80';
@@ -370,7 +507,7 @@
     let soundOn = true;
     let showHint = true;
     let bestTimes = {};
-    try { bestTimes = JSON.parse(localStorage.getItem(BEST_KEY) || '{}'); } catch(e) {}
+    try { bestTimes = JSON.parse(localStorage.getItem(BEST_KEY) || '{}'); } catch (e) { }
 
     // ─── かわいいPOPな Web Audio BGM & SE ────────────────
     class PopAudio {
@@ -427,7 +564,7 @@
         this.init();
         // かわいいマーチ風ピコピコループ
         const melody = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.0, 698.46];
-        const bass   = [261.63, 0,      392.00, 0,      293.66, 0,     440.0, 0];
+        const bass = [261.63, 0, 392.00, 0, 293.66, 0, 440.0, 0];
         this.step = 0;
         this.bgmTimer = setInterval(() => {
           if (!soundOn || !isPlaying) return;
@@ -592,13 +729,16 @@
       const isNew = !prevBest || finalSec < prevBest;
       if (isNew) {
         bestTimes[currentMode] = finalSec;
-        try { localStorage.setItem(BEST_KEY, JSON.stringify(bestTimes)); } catch(e) {}
+        try { localStorage.setItem(BEST_KEY, JSON.stringify(bestTimes)); } catch (e) { }
       }
       updateBestHud();
 
+      const earned = currentMode.startsWith('5x5') ? 10 : currentMode.startsWith('7x7') ? 20 : 35;
+      addAdventureCoins(earned, 1);
+
       document.getElementById('clear-time').textContent = finalSec.toFixed(2) + ' びょう';
       document.getElementById('clear-new-rec').style.display = isNew ? 'inline-block' : 'none';
-      document.getElementById('clear-msg').textContent = `${MODES[currentMode].label} を クリアしたよ！`;
+      document.getElementById('clear-msg').innerHTML = `${MODES[currentMode].label} を クリアしたよ！<br><span style="color:#ef6c00;font-weight:900;">🪙 +${earned}コイン ゲット！</span>`;
       document.getElementById('clear-overlay').classList.remove('hidden');
 
       audio.playClear();
@@ -658,4 +798,5 @@
     layoutBoard();
   </script>
 </body>
+
 </html>
