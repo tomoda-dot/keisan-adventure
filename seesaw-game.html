@@ -310,6 +310,8 @@
       min-height: 68px;
     }
     .weight.choice {
+      --w-size: 54px;
+      --w-font: 22px;
       background: #29b6f6;
       box-shadow: 0 5px 0 #0277bd;
       cursor: pointer;
@@ -580,7 +582,7 @@
       // 下部トレイ
       const tray = document.getElementById('tray-items');
       tray.innerHTML = trayOptions.map(o =>
-        `<button class="weight choice${o.used ? ' used' : ''}" style="${weightStyleVars(o.val, maxBase)}" onclick="addWeight('${o.id}')">${o.val}</button>`
+        `<button class="weight choice${o.used ? ' used' : ''}" onclick="addWeight('${o.id}')">${o.val}</button>`
       ).join('');
     }
 
