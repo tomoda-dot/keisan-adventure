@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ひろさパズル！ | けいさんアドベンチャー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pri: #3949ab;
+      --pri-dark: #1a237e;
+      --bg: #e8eaf6;
+      --text: #263238;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      height: 100dvh;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* 単色メインバー */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      margin: 0 -14px;
+      padding: 10px 14px;
+      background: var(--pri);
+      box-shadow: 0 3px 0 var(--pri-dark);
+    }
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+    }
+    .pill-btn:active { transform: translateY(2px); }
+    .pill-btn.sound-on { background: #fff8e1; color: #ef6c00; }
+    .game-title {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4vw, 24px);
+      color: #fff;
+      text-shadow: 0 2px 0 var(--pri-dark);
+      white-space: nowrap;
+    }
+
+    /* 難易度バー */
+    .controls-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .chip-group {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,0.8);
+      padding: 4px;
+      border-radius: 999px;
+      border: 2px solid #9fa8da;
+    }
+    .mode-chip {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: #546e7a;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .mode-chip.active {
+      background: var(--pri);
+      color: #fff;
+      box-shadow: 0 2px 0 var(--pri-dark);
+    }
+
+    /* 目標ステータスカード */
+    .goal-card {
+      flex-shrink: 0;
+      background: #fff;
+      border-radius: 18px;
+      border: 3px solid #9fa8da;
+      padding: 8px 12px;
+      box-shadow: 0 4px 0 #9fa8da;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .goal-main { flex: 1; }
+    .goal-text {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(17px, 4.2vw, 23px);
+      color: #1a237e;
+    }
+    .goal-sub {
+      font-size: 12px;
+      font-weight: 800;
+      color: #5c6bc0;
+      margin-top: 2px;
+    }
+    .goal-sub.near { color: #ef6c00; }
+    .goal-sub.win { color: #2e7d32; }
+    .goal-sub.over { color: #e53935; }
+    .progress-bar {
+      margin-top: 4px;
+      height: 10px;
+      background: #e8eaf6;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #c5cae9;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #5c6bc0, #29b6f6);
+      transition: width 0.16s ease-out;
+    }
+    .progress-fill.win { background: #43a047; }
+    .progress-fill.over { background: #e53935; }
+
+    .score-pill {
+      background: #e8eaf6;
+      border: 2px solid #9fa8da;
+      border-radius: 14px;
+      padding: 5px 10px;
+      text-align: center;
+      min-width: 74px;
+    }
+    .sp-lbl { font-size: 10px; font-weight: 800; color: #546e7a; }
+    .sp-val { font-size: 17px; font-weight: 900; color: #1a237e; }
+
+    /* 方眼グリッドステージ */
+    .board-stage {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .grid-board {
+      background: #fff;
+      padding: 8px;
+      border-radius: 18px;
+      border: 4px solid #7986cb;
+      box-shadow: 0 6px 0 #5c6bc0;
+      display: grid;
+      gap: 3px;
+      max-height: 100%;
+      aspect-ratio: 1 / 1;
+      height: min(100%, 340px);
+    }
+    .cell {
+      border-radius: 6px;
+      background: #f5f7ff;
+      border: 1.5px solid #d1d9ff;
+      cursor: pointer;
+      transition: background 0.1s, transform 0.08s;
+      position: relative;
+    }
+    .cell.blocked {
+      background: #cfd8dc;
+      border-color: #90a4ae;
+      cursor: not-allowed;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.4) 4px, rgba(255,255,255,0.4) 8px);
+    }
+    .cell.filled {
+      border: 2px solid rgba(255,255,255,0.85);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.18);
+    }
+    .cell.preview-ok {
+      background: rgba(76, 175, 80, 0.35);
+      border-color: #43a047;
+    }
+    .cell.preview-ng {
+      background: rgba(229, 57, 53, 0.35);
+      border-color: #e53935;
+    }
+
+    /* 下部パレット */
+    .tray-card {
+      flex-shrink: 0;
+      background: #fff;
+      border-radius: 20px;
+      border: 3px solid #9fa8da;
+      box-shadow: 0 4px 0 #9fa8da;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .tray-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .tray-hint {
+      font-size: 11px;
+      font-weight: 800;
+      color: #546e7a;
+    }
+    .tray-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .act-btn {
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 2px solid #9fa8da;
+      background: #e8eaf6;
+      color: #1a237e;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .act-btn:active { transform: translateY(2px); }
+    .act-btn.rotate { background: #fff8e1; border-color: #ffb74d; color: #e65100; }
+
+    .pieces-row {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px 2px;
+      align-items: center;
+      justify-content: center;
+      min-height: 70px;
+    }
+    .piece-btn {
+      background: #f5f7ff;
+      border: 3px solid #c5cae9;
+      border-radius: 14px;
+      padding: 6px 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      transition: transform 0.1s, border-color 0.1s;
+    }
+    .piece-btn.selected {
+      border-color: #ff9800;
+      background: #fff8e1;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(255, 152, 0, 0.25);
+    }
+    .piece-btn.used {
+      opacity: 0.28;
+      pointer-events: none;
+    }
+    .mini-grid {
+      display: grid;
+      gap: 2px;
+    }
+    .mini-cell {
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+    }
+    .piece-area {
+      font-size: 10px;
+      font-weight: 900;
+      color: #3949ab;
+    }
+
+    /* 紙吹雪 */
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 14px;
+      border-radius: 3px;
+      animation: fall 1.2s ease-out forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(540deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top-bar">
+      <a href="index.html" class="pill-btn">🏠 TOP</a>
+      <h1 class="game-title">🟦 ひろさパズル！</h1>
+      <button id="sound-btn" class="pill-btn sound-on" type="button">🎵 ON</button>
+    </header>
+
+    <div class="controls-row">
+      <div class="chip-group" id="diff-group">
+        <button class="mode-chip active" data-diff="easy" type="button">かんたん</button>
+        <button class="mode-chip" data-diff="normal" type="button">ふつう</button>
+        <button class="mode-chip" data-diff="hard" type="button">むずかしい</button>
+      </div>
+    </div>
+
+    <section class="goal-card">
+      <div class="goal-main">
+        <div class="goal-text" id="goal-text">ぴったり 6マス うめよう！</div>
+        <div class="goal-sub" id="goal-sub">いま: 0 / 6 マス</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+      <div class="score-pill">
+        <div class="sp-lbl">クリア</div>
+        <div class="sp-val" id="hud-score">0もん</div>
+      </div>
+    </section>
+
+    <main class="board-stage">
+      <div class="grid-board" id="grid-board"></div>
+    </main>
+
+    <section class="tray-card">
+      <div class="tray-head">
+        <span class="tray-hint" id="tray-hint">ブロックを えらんで マスを タップ！（おいたブロックは タップでもどるよ）</span>
+        <div class="tray-actions">
+          <button class="act-btn rotate" id="rotate-btn" type="button" style="display:none;">🔄 まわす</button>
+          <button class="act-btn" id="reset-btn" type="button">↺ もどす</button>
+        </div>
+      </div>
+      <div class="pieces-row" id="pieces-row"></div>
+    </section>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script>
+    const SHAPES = {
+      s1x1: [[0,0]],
+      s1x2: [[0,0],[0,1]],
+      s2x1: [[0,0],[1,0]],
+      s1x3: [[0,0],[0,1],[0,2]],
+      s2x2: [[0,0],[0,1],[1,0],[1,1]],
+      s2x3: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]],
+      s1x4: [[0,0],[0,1],[0,2],[0,3]],
+      l3:   [[0,0],[1,0],[1,1]],
+      l4:   [[0,0],[1,0],[2,0],[2,1]],
+      t4:   [[0,0],[0,1],[0,2],[1,1]],
+      z4:   [[0,0],[0,1],[1,1],[1,2]]
+    };
+
+    const PIECE_COLORS = ['#ef5350', '#42a5f5', '#66bb6a', '#ffa726', '#ab47bc', '#26a69a', '#ec407a'];
+
+    const $ = id => document.getElementById(id);
+    const boardEl = $('grid-board');
+    const goalTextEl = $('goal-text');
+    const goalSubEl = $('goal-sub');
+    const progressEl = $('progress-fill');
+    const hudScoreEl = $('hud-score');
+    const piecesRowEl = $('pieces-row');
+    const rotateBtn = $('rotate-btn');
+
+    let diff = 'easy';
+    let soundOn = true;
+    let audioCtx = null;
+
+    let gridSize = 6;
+    let targetArea = 6;
+    let maxMoves = 99;
+    let blockedCells = new Set();
+    let grid = []; // null or { placedId, color }
+    let pieces = []; // { id, cells, color, used }
+    let selectedPieceId = null;
+    let placedCount = 0;
+    let score = 0;
+    let locked = false;
+    let nextPlacedId = 1;
+
+    function addAdventureCoins(earnedCoins, solvedDelta = 0) {
+      try {
+        const raw = localStorage.getItem('KEISAN_ADVENTURE_SAVE_V1');
+        const st = raw ? JSON.parse(raw) : { coins: 0, stars: 0, totalSolved: 0 };
+        st.coins = (st.coins || 0) + earnedCoins;
+        if (solvedDelta > 0) st.totalSolved = (st.totalSolved || 0) + solvedDelta;
+        localStorage.setItem('KEISAN_ADVENTURE_SAVE_V1', JSON.stringify(st));
+        return st.coins;
+      } catch (e) { return 0; }
+    }
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, dur, type = 'sine', gainVal = 0.14, delay = 0) {
+      if (!soundOn) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime + delay;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(gainVal, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + dur);
+    }
+
+    function playPlaceSfx() {
+      playTone(523.25, 0.06, 'triangle', 0.15, 0);
+      playTone(659.25, 0.08, 'triangle', 0.14, 0.03);
+    }
+
+    function playRemoveSfx() {
+      playTone(440, 0.06, 'sine', 0.12);
+    }
+
+    function playWinSfx() {
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+        playTone(f, 0.14, 'triangle', 0.18, i * 0.07);
+      });
+    }
+
+    function playWrongSfx() {
+      playTone(220, 0.12, 'sawtooth', 0.1);
+    }
+
+    function spawnConfetti() {
+      const box = $('confetti');
+      const colors = ['#3949ab', '#ffca28', '#66bb6a', '#ec407a', '#29b6f6'];
+      for (let i = 0; i < 26; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-piece';
+        p.style.left = (10 + Math.random() * 80) + 'vw';
+        p.style.top = (-10 - Math.random() * 20) + 'px';
+        p.style.background = colors[i % colors.length];
+        p.style.animationDuration = (0.85 + Math.random() * 0.6) + 's';
+        box.appendChild(p);
+        setTimeout(() => p.remove(), 1600);
+      }
+    }
+
+    function rotateCells90(cells) {
+      const rotated = cells.map(([r, c]) => [c, -r]);
+      const minR = Math.min(...rotated.map(p => p[0]));
+      const minC = Math.min(...rotated.map(p => p[1]));
+      return rotated.map(([r, c]) => [r - minR, c - minC]);
+    }
+
+    function buildPiecePalette() {
+      let poolKeys = [];
+      if (diff === 'easy') {
+        targetArea = 4 + Math.floor(Math.random() * 6); // 4〜9
+        poolKeys = ['s1x1', 's1x2', 's2x1', 's1x3', 's2x2', 's2x3'];
+        maxMoves = 99;
+      } else if (diff === 'normal') {
+        targetArea = 10 + Math.floor(Math.random() * 7); // 10〜16
+        poolKeys = ['s1x2', 's1x3', 's2x2', 's2x3', 's1x4', 'l3', 's1x1'];
+        maxMoves = 99;
+      } else {
+        targetArea = 18 + Math.floor(Math.random() * 8); // 18〜25
+        poolKeys = ['s2x3', 's2x2', 's1x4', 'l4', 't4', 'z4', 'l3', 's1x2'];
+        maxMoves = 7;
+      }
+
+      // 必ず目標面積ちょうどを作れる組み合わせを作る
+      const chosen = [];
+      let rem = targetArea;
+      let guard = 0;
+      while (rem > 0 && guard < 40) {
+        guard++;
+        const candidates = poolKeys.filter(k => SHAPES[k].length <= rem);
+        if (candidates.length === 0) break;
+        const pick = candidates[Math.floor(Math.random() * candidates.length)];
+        chosen.push(pick);
+        rem -= SHAPES[pick].length;
+      }
+      while (rem > 0) {
+        chosen.push('s1x1');
+        rem -= 1;
+      }
+
+      if (diff === 'hard') {
+        maxMoves = Math.max(chosen.length + 1, 6);
+      }
+
+      // ダミーブロックを1〜2個追加
+      const extraCount = diff === 'easy' ? 1 : 2;
+      for (let i = 0; i < extraCount; i++) {
+        chosen.push(poolKeys[Math.floor(Math.random() * poolKeys.length)]);
+      }
+
+      // シャッフル
+      for (let i = chosen.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [chosen[i], chosen[j]] = [chosen[j], chosen[i]];
+      }
+
+      pieces = chosen.map((key, idx) => ({
+        id: 'p_' + idx,
+        cells: SHAPES[key].map(p => [...p]),
+        color: PIECE_COLORS[idx % PIECE_COLORS.length],
+        used: false
+      }));
+      selectedPieceId = pieces[0].id;
+    }
+
+    function newProblem() {
+      locked = false;
+      gridSize = diff === 'easy' ? 6 : 8;
+      grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+      placedCount = 0;
+      blockedCells = new Set();
+
+      if (diff === 'hard') {
+        // むずかしい：外周や角にいくつかの障害物マスを置く
+        const candidates = [
+          [0,0],[0,gridSize-1],[gridSize-1,0],[gridSize-1,gridSize-1],
+          [3,3],[3,4],[4,3],[4,4]
+        ];
+        const count = 4;
+        for (let i = 0; i < count; i++) {
+          const [r, c] = candidates[Math.floor(Math.random() * candidates.length)];
+          blockedCells.add(`${r},${c}`);
+        }
+      }
+
+      rotateBtn.style.display = diff === 'easy' ? 'none' : 'inline-block';
+      buildPiecePalette();
+      renderAll();
+    }
+
+    function currentArea() {
+      let count = 0;
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          if (grid[r][c]) count++;
+        }
+      }
+      return count;
+    }
+
+    function updateStatusUI() {
+      const area = currentArea();
+      const moveText = diff === 'hard' ? `（のこり ${Math.max(0, maxMoves - placedCount)}て）` : '';
+      goalTextEl.textContent = `ぴったり ${targetArea}マス うめよう！`;
+
+      const pct = Math.min(100, (area / targetArea) * 100);
+      progressEl.style.width = pct + '%';
+      progressEl.className = 'progress-fill';
+
+      if (area === targetArea) {
+        goalSubEl.className = 'goal-sub win';
+        goalSubEl.textContent = `✨ ${area} / ${targetArea} マス ぴったり！`;
+        progressEl.classList.add('win');
+      } else if (area > targetArea) {
+        goalSubEl.className = 'goal-sub over';
+        goalSubEl.textContent = `💦 ${area} / ${targetArea} マス（おおすぎ！ タップではずそう）`;
+        progressEl.classList.add('over');
+      } else if (targetArea - area <= 3) {
+        goalSubEl.className = 'goal-sub near';
+        goalSubEl.textContent = `あと ${targetArea - area} マス！${moveText}`;
+      } else {
+        goalSubEl.className = 'goal-sub';
+        goalSubEl.textContent = `いま: ${area} / ${targetArea} マス ${moveText}`;
+      }
+    }
+
+    function canPlaceAt(piece, baseR, baseC) {
+      return piece.cells.every(([dr, dc]) => {
+        const r = baseR + dr;
+        const c = baseC + dc;
+        if (r < 0 || r >= gridSize || c < 0 || c >= gridSize) return false;
+        if (blockedCells.has(`${r},${c}`)) return false;
+        if (grid[r][c] !== null) return false;
+        return true;
+      });
+    }
+
+    function placePiece(r, c) {
+      if (locked) return;
+      if (grid[r][c]) {
+        // 配置済みブロックをタップして取り外す
+        const target = grid[r][c];
+        for (let rr = 0; rr < gridSize; rr++) {
+          for (let cc = 0; cc < gridSize; cc++) {
+            if (grid[rr][cc] && grid[rr][cc].placedId === target.placedId) {
+              grid[rr][cc] = null;
+            }
+          }
+        }
+        const p = pieces.find(item => item.id === target.pieceId);
+        if (p) {
+          p.used = false;
+          selectedPieceId = p.id;
+        }
+        placedCount = Math.max(0, placedCount - 1);
+        playRemoveSfx();
+        renderAll();
+        return;
+      }
+
+      if (blockedCells.has(`${r},${c}`)) return;
+      const piece = pieces.find(p => p.id === selectedPieceId && !p.used);
+      if (!piece) return;
+
+      if (diff === 'hard' && placedCount >= maxMoves) {
+        playWrongSfx();
+        goalSubEl.className = 'goal-sub over';
+        goalSubEl.textContent = '手数オーバー！ おいたブロックを タップではずそう';
+        return;
+      }
+
+      if (!canPlaceAt(piece, r, c)) {
+        playWrongSfx();
+        return;
+      }
+
+      const pid = nextPlacedId++;
+      piece.cells.forEach(([dr, dc]) => {
+        grid[r + dr][c + dc] = { placedId: pid, pieceId: piece.id, color: piece.color };
+      });
+      piece.used = true;
+      placedCount++;
+      playPlaceSfx();
+
+      // 次の未使用ブロックを自動選択
+      const nextUnused = pieces.find(p => !p.used);
+      selectedPieceId = nextUnused ? nextUnused.id : null;
+
+      renderAll();
+      checkWin();
+    }
+
+    function checkWin() {
+      const area = currentArea();
+      if (area === targetArea) {
+        locked = true;
+        score++;
+        hudScoreEl.textContent = score + 'もん';
+        const earned = diff === 'easy' ? 3 : diff === 'normal' ? 5 : 8;
+        addAdventureCoins(earned, 1);
+
+        goalSubEl.className = 'goal-sub win';
+        goalSubEl.textContent = `🎉 ぴったり ${targetArea}マス クリア！ 🪙 +${earned}コイン！`;
+        playWinSfx();
+        spawnConfetti();
+        setTimeout(newProblem, 1450);
+      }
+    }
+
+    function clearPreview() {
+      boardEl.querySelectorAll('.cell').forEach(el => {
+        el.classList.remove('preview-ok', 'preview-ng');
+      });
+    }
+
+    function showPreview(r, c) {
+      clearPreview();
+      if (locked || grid[r][c] || blockedCells.has(`${r},${c}`)) return;
+      const piece = pieces.find(p => p.id === selectedPieceId && !p.used);
+      if (!piece) return;
+      const ok = canPlaceAt(piece, r, c);
+      piece.cells.forEach(([dr, dc]) => {
+        const rr = r + dr;
+        const cc = c + dc;
+        if (rr >= 0 && rr < gridSize && cc >= 0 && cc < gridSize) {
+          const cellEl = boardEl.querySelector(`[data-r="${rr}"][data-c="${cc}"]`);
+          if (cellEl && !grid[rr][cc] && !blockedCells.has(`${rr},${cc}`)) {
+            cellEl.classList.add(ok ? 'preview-ok' : 'preview-ng');
+          }
+        }
+      });
+    }
+
+    function renderBoard() {
+      boardEl.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+      boardEl.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+      boardEl.innerHTML = '';
+
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+
+          if (blockedCells.has(`${r},${c}`)) {
+            cell.classList.add('blocked');
+          } else if (grid[r][c]) {
+            cell.classList.add('filled');
+            cell.style.background = grid[r][c].color;
+          }
+
+          cell.addEventListener('pointerenter', () => showPreview(r, c));
+          cell.addEventListener('click', () => placePiece(r, c));
+          boardEl.appendChild(cell);
+        }
+      }
+      boardEl.addEventListener('pointerleave', clearPreview, { once: true });
+    }
+
+    function renderPieces() {
+      piecesRowEl.innerHTML = '';
+      pieces.forEach(p => {
+        const maxR = Math.max(...p.cells.map(x => x[0])) + 1;
+        const maxC = Math.max(...p.cells.map(x => x[1])) + 1;
+        const cellSet = new Set(p.cells.map(([r, c]) => `${r},${c}`));
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'piece-btn' + (p.id === selectedPieceId ? ' selected' : '') + (p.used ? ' used' : '');
+
+        const mini = document.createElement('div');
+        mini.className = 'mini-grid';
+        mini.style.gridTemplateColumns = `repeat(${maxC}, 11px)`;
+        for (let r = 0; r < maxR; r++) {
+          for (let c = 0; c < maxC; c++) {
+            const mc = document.createElement('div');
+            mc.className = 'mini-cell';
+            if (cellSet.has(`${r},${c}`)) {
+              mc.style.background = p.color;
+            }
+            mini.appendChild(mc);
+          }
+        }
+
+        const lbl = document.createElement('span');
+        lbl.className = 'piece-area';
+        lbl.textContent = p.cells.length + 'マス';
+
+        btn.appendChild(mini);
+        btn.appendChild(lbl);
+        btn.addEventListener('click', () => {
+          if (p.used || locked) return;
+          selectedPieceId = p.id;
+          playTone(620, 0.04, 'sine', 0.08);
+          renderPieces();
+        });
+        piecesRowEl.appendChild(btn);
+      });
+    }
+
+    function renderAll() {
+      updateStatusUI();
+      renderBoard();
+      renderPieces();
+    }
+
+    rotateBtn.addEventListener('click', () => {
+      if (locked) return;
+      const p = pieces.find(item => item.id === selectedPieceId && !item.used);
+      if (!p) return;
+      p.cells = rotateCells90(p.cells);
+      playTone(720, 0.05, 'triangle', 0.1);
+      renderPieces();
+    });
+
+    $('reset-btn').addEventListener('click', () => {
+      if (locked) return;
+      grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+      pieces.forEach(p => { p.used = false; });
+      placedCount = 0;
+      selectedPieceId = pieces[0] ? pieces[0].id : null;
+      playRemoveSfx();
+      renderAll();
+    });
+
+    $('diff-group').addEventListener('click', e => {
+      const btn = e.target.closest('.mode-chip');
+      if (!btn) return;
+      diff = btn.dataset.diff;
+      document.querySelectorAll('#diff-group .mode-chip').forEach(c => c.classList.toggle('active', c === btn));
+      newProblem();
+    });
+
+    $('sound-btn').addEventListener('click', () => {
+      soundOn = !soundOn;
+      const b = $('sound-btn');
+      b.textContent = soundOn ? '🎵 ON' : '🔇 OFF';
+      b.classList.toggle('sound-on', soundOn);
+      if (soundOn) playPlaceSfx();
+    });
+
+    newProblem();
+  </script>
+</body>
+</html>
