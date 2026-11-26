@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>コインで100！ | けいさんアドベンチャー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pri: #f59e0b;
+      --pri-dark: #b45309;
+      --bg: #fffbeb;
+      --text: #263238;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      height: 100dvh;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* 単色メインバー */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      margin: 0 -14px;
+      padding: 10px 14px;
+      background: var(--pri);
+      box-shadow: 0 3px 0 var(--pri-dark);
+    }
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+    }
+    .pill-btn:active { transform: translateY(2px); }
+    .pill-btn.sound-on { background: #fff8e1; color: #b45309; }
+    .game-title {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4vw, 24px);
+      color: #fff;
+      text-shadow: 0 2px 0 var(--pri-dark);
+      white-space: nowrap;
+    }
+
+    /* モード切替バー */
+    .mode-bar {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .chip-group {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,0.8);
+      padding: 4px;
+      border-radius: 999px;
+      border: 2px solid #fde68a;
+    }
+    .mode-chip {
+      padding: 6px 13px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: #546e7a;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .mode-chip.active {
+      background: var(--pri);
+      color: #fff;
+      box-shadow: 0 2px 0 var(--pri-dark);
+    }
+
+    /* 合計表示・お題エリア */
+    .summary-card {
+      flex-shrink: 0;
+      background: #fff;
+      border-radius: 20px;
+      border: 3px solid #fcd34d;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 4px 0 #fcd34d;
+    }
+    .total-block {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .total-num {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(36px, 8vw, 52px);
+      line-height: 1;
+      color: #b45309;
+    }
+    .total-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .kanji-num {
+      font-size: clamp(14px, 3vw, 17px);
+      font-weight: 900;
+      color: #d97706;
+    }
+    .place-breakdown {
+      font-size: 12px;
+      font-weight: 800;
+      color: #64748b;
+    }
+
+    .mission-badge {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      border-radius: 16px;
+      padding: 6px 12px;
+      text-align: right;
+      min-width: 128px;
+    }
+    .mission-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #92400e;
+    }
+    .mission-val {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4vw, 24px);
+      color: #b45309;
+    }
+
+    /* 位取りトレイ（100 | 10 | 1） */
+    .place-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 0.9fr 1.15fr 1.15fr;
+      gap: 8px;
+      position: relative;
+    }
+    .place-col {
+      background: #fff;
+      border-radius: 20px;
+      border: 3px solid #fde68a;
+      box-shadow: 0 5px 0 #fcd34d;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .place-col.flash {
+      animation: colFlash 0.45s ease;
+    }
+    @keyframes colFlash {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); transform: scale(1); }
+      40% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); transform: scale(1.03); background: #fef9c3; }
+      100% { box-shadow: 0 5px 0 #fcd34d; transform: scale(1); }
+    }
+
+    .col-head {
+      padding: 6px 8px;
+      text-align: center;
+      font-weight: 900;
+      font-size: clamp(12px, 2.8vw, 15px);
+      color: #fff;
+    }
+    .col-100 .col-head { background: #ef4444; }
+    .col-10  .col-head { background: #f59e0b; }
+    .col-1   .col-head { background: #94a3b8; }
+
+    .col-count {
+      text-align: center;
+      font-family: 'Potta One', cursive;
+      font-size: clamp(20px, 4.5vw, 26px);
+      padding: 4px 0 2px;
+      color: #334155;
+      border-bottom: 2px dashed #f1f5f9;
+    }
+    .col-coins {
+      flex: 1;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      align-content: start;
+      justify-items: center;
+      overflow-y: auto;
+    }
+    .col-100 .col-coins {
+      grid-template-columns: 1fr;
+      align-content: center;
+    }
+
+    /* コインビジュアル */
+    .coin {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Potta One', cursive;
+      font-weight: 900;
+      animation: coinPop 0.16s ease-out;
+    }
+    @keyframes coinPop {
+      from { transform: scale(0.4); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .coin-1 {
+      width: clamp(32px, 7.5vw, 42px);
+      height: clamp(32px, 7.5vw, 42px);
+      background: radial-gradient(circle at 30% 30%, #f8fafc, #cbd5e1);
+      border: 3px solid #94a3b8;
+      color: #475569;
+      font-size: clamp(14px, 3.2vw, 18px);
+      box-shadow: 0 3px 0 #64748b;
+    }
+    .coin-10 {
+      width: clamp(36px, 8vw, 46px);
+      height: clamp(36px, 8vw, 46px);
+      background: radial-gradient(circle at 30% 30%, #fde68a, #d97706);
+      border: 3px solid #b45309;
+      color: #fff;
+      font-size: clamp(14px, 3.2vw, 18px);
+      text-shadow: 0 1px 0 #92400e;
+      box-shadow: 0 3px 0 #92400e;
+    }
+    .chest-100 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      animation: coinPop 0.3s ease-out;
+    }
+    .chest-icon {
+      font-size: clamp(46px, 11vw, 66px);
+      line-height: 1;
+      filter: drop-shadow(0 6px 8px rgba(0,0,0,0.18));
+    }
+    .chest-tag {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 2px solid #fca5a5;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    /* 進化バナー */
+    .evo-toast {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(180, 83, 9, 0.94);
+      color: #fff;
+      border: 3px solid #fff;
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4.5vw, 24px);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 20;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    .evo-toast.show {
+      animation: toastPop 0.75s ease forwards;
+    }
+    @keyframes toastPop {
+      0% { opacity: 0; transform: translate(-50%, -40%) scale(0.7); }
+      25% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      75% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -65%) scale(0.95); }
+    }
+
+    /* 操作エリア */
+    .tap-dock {
+      flex-shrink: 0;
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      justify-content: center;
+      position: relative;
+    }
+    .tap-main-btn {
+      flex: 2;
+      min-height: 76px;
+      border-radius: 22px;
+      border: 4px solid #fff;
+      background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+      color: #fff;
+      font-family: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 0 #b45309;
+      text-shadow: 0 2px 0 #b45309;
+      transition: transform 0.05s;
+    }
+    .tap-main-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #b45309;
+    }
+    .tap-main-icon { font-size: clamp(28px, 6vw, 36px); }
+    .tap-main-text {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(20px, 4.5vw, 26px);
+    }
+
+    .sub-btn {
+      flex: 1;
+      max-width: 140px;
+      min-height: 76px;
+      border-radius: 22px;
+      border: 4px solid #fff;
+      font-family: inherit;
+      font-weight: 900;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      transition: transform 0.05s;
+    }
+    .sub-btn:active { transform: translateY(5px); }
+    .sub-btn.plus10 {
+      background: #ef4444;
+      box-shadow: 0 6px 0 #b91c1c;
+    }
+    .sub-btn.plus10:active { box-shadow: 0 1px 0 #b91c1c; }
+    .sub-btn.undo {
+      background: #64748b;
+      box-shadow: 0 6px 0 #334155;
+    }
+    .sub-btn.undo:active { box-shadow: 0 1px 0 #334155; }
+    .sub-btn-big {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(20px, 4.5vw, 24px);
+    }
+    .sub-btn-small { font-size: 11px; font-weight: 800; }
+
+    /* 飛び出すコイン粒子 */
+    .fly-coin {
+      position: fixed;
+      font-size: 26px;
+      pointer-events: none;
+      z-index: 40;
+      animation: flyUp 0.45s ease-out forwards;
+    }
+    @keyframes flyUp {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); }
+      100% { opacity: 0; transform: translate(-50%, -70px) scale(1.25); }
+    }
+
+    /* リザルト・クリアオーバーレイ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(38, 50, 56, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .overlay.show { display: flex; }
+    .result-card {
+      background: #fff;
+      border-radius: 28px;
+      border: 5px solid #fcd34d;
+      padding: 26px 24px;
+      width: min(390px, 100%);
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+      animation: cardIn 0.25s ease-out;
+    }
+    @keyframes cardIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .result-title {
+      font-family: 'Potta One', cursive;
+      font-size: 26px;
+      color: #b45309;
+      margin-bottom: 12px;
+    }
+    .result-big {
+      font-family: 'Potta One', cursive;
+      font-size: 40px;
+      color: #ef4444;
+      margin-bottom: 6px;
+    }
+    .result-sub {
+      font-size: 14px;
+      font-weight: 800;
+      color: #64748b;
+      margin-bottom: 18px;
+    }
+    .retry-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 18px;
+      border: none;
+      background: var(--pri);
+      color: #fff;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--pri-dark);
+    }
+    .retry-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--pri-dark); }
+
+    /* 紙吹雪 */
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 45;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 14px;
+      border-radius: 3px;
+      animation: fall 1.2s ease-out forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(540deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top-bar">
+      <a href="index.html" class="pill-btn">🏠 TOP</a>
+      <h1 class="game-title">🪙 コインで100！</h1>
+      <button id="sound-btn" class="pill-btn sound-on" type="button">🎵 ON</button>
+    </header>
+
+    <div class="mode-bar">
+      <div class="chip-group" id="mode-group">
+        <button class="mode-chip active" data-mode="rush100" type="button">⚡ 100まで連打アタック</button>
+        <button class="mode-chip" data-mode="otsukai" type="button">🛍️ おつかいミッション</button>
+      </div>
+    </div>
+
+    <section class="summary-card">
+      <div class="total-block">
+        <div class="total-num" id="total-num">0</div>
+        <div class="total-meta">
+          <div class="kanji-num" id="kanji-num">ゼロ</div>
+          <div class="place-breakdown" id="place-breakdown">10が 0こ と 1が 0こ</div>
+        </div>
+      </div>
+      <div class="mission-badge">
+        <div class="mission-label" id="mission-label">タイム</div>
+        <div class="mission-val" id="mission-val">0.00びょう</div>
+      </div>
+    </section>
+
+    <main class="place-grid">
+      <div class="place-col col-100" id="col-100">
+        <div class="col-head">100のくらい</div>
+        <div class="col-count" id="count-100">0</div>
+        <div class="col-coins" id="coins-100"></div>
+      </div>
+      <div class="place-col col-10" id="col-10">
+        <div class="col-head">10のくらい</div>
+        <div class="col-count" id="count-10">0</div>
+        <div class="col-coins" id="coins-10"></div>
+      </div>
+      <div class="place-col col-1" id="col-1">
+        <div class="col-head">1のくらい</div>
+        <div class="col-count" id="count-1">0</div>
+        <div class="col-coins" id="coins-1"></div>
+      </div>
+      <div class="evo-toast" id="evo-toast"></div>
+    </main>
+
+    <section class="tap-dock" id="tap-dock"></section>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <div class="overlay" id="result-overlay">
+    <div class="result-card">
+      <div class="result-title" id="res-title">👑 100の宝箱 かんせい！</div>
+      <div class="result-big" id="res-big">12.34びょう</div>
+      <div class="result-sub" id="res-sub">ベストタイム: 12.34びょう</div>
+      <button class="retry-btn" id="retry-btn" type="button">🪙 もういちど あそぶ</button>
+    </div>
+  </div>
+
+  <script>
+    const BEST_TIME_KEY = 'keisan_coin100_best_time';
+    const $ = id => document.getElementById(id);
+
+    const totalNumEl = $('total-num');
+    const kanjiNumEl = $('kanji-num');
+    const breakdownEl = $('place-breakdown');
+    const missionLabelEl = $('mission-label');
+    const missionValEl = $('mission-val');
+    const col100El = $('col-100');
+    const col10El = $('col-10');
+    const col1El = $('col-1');
+    const count100El = $('count-100');
+    const count10El = $('count-10');
+    const count1El = $('count-1');
+    const coins100El = $('coins-100');
+    const coins10El = $('coins-10');
+    const coins1El = $('coins-1');
+    const evoToastEl = $('evo-toast');
+    const dockEl = $('tap-dock');
+    const overlayEl = $('result-overlay');
+
+    let mode = 'rush100'; // 'rush100' | 'otsukai'
+    let soundOn = true;
+    let audioCtx = null;
+
+    let total = 0;
+    let target = 34;
+    let clearedCount = 0;
+    let locked = false;
+
+    let startTs = 0;
+    let elapsedMs = 0;
+    let timerRaf = null;
+    let timerRunning = false;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, dur, type = 'sine', gainVal = 0.14, delay = 0) {
+      if (!soundOn) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime + delay;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(gainVal, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + dur);
+    }
+
+    function playCoinSfx(isTen = false) {
+      if (isTen) {
+        playTone(880, 0.07, 'triangle', 0.15, 0);
+        playTone(1318.5, 0.12, 'triangle', 0.16, 0.05);
+      } else {
+        playTone(1046.5, 0.05, 'sine', 0.12, 0);
+        playTone(1567.98, 0.08, 'sine', 0.12, 0.03);
+      }
+    }
+
+    function playEvolveSfx() {
+      playTone(659.25, 0.08, 'triangle', 0.16, 0);
+      playTone(783.99, 0.08, 'triangle', 0.16, 0.06);
+      playTone(1046.5, 0.16, 'triangle', 0.18, 0.12);
+    }
+
+    function playWinSfx() {
+      [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => {
+        playTone(f, 0.14, 'triangle', 0.18, i * 0.07);
+      });
+    }
+
+    function spawnConfetti() {
+      const box = $('confetti');
+      const colors = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#a855f7'];
+      for (let i = 0; i < 28; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-piece';
+        p.style.left = (8 + Math.random() * 84) + 'vw';
+        p.style.top = (-10 - Math.random() * 20) + 'px';
+        p.style.background = colors[i % colors.length];
+        p.style.animationDuration = (0.85 + Math.random() * 0.6) + 's';
+        box.appendChild(p);
+        setTimeout(() => p.remove(), 1600);
+      }
+    }
+
+    function toKanji(n) {
+      if (n === 0) return 'ゼロ（0）';
+      if (n === 100) return '百（ひゃく）';
+      const digits = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+      const tens = Math.floor(n / 10);
+      const ones = n % 10;
+      let str = '';
+      if (tens === 1) str += '十';
+      else if (tens > 1) str += digits[tens] + '十';
+      if (ones > 0) str += digits[ones];
+      return str;
+    }
+
+    function showToast(msg) {
+      evoToastEl.className = 'evo-toast';
+      void evoToastEl.offsetWidth;
+      evoToastEl.textContent = msg;
+      evoToastEl.className = 'evo-toast show';
+    }
+
+    function flashCol(colEl) {
+      colEl.classList.remove('flash');
+      void colEl.offsetWidth;
+      colEl.classList.add('flash');
+    }
+
+    function spawnFlyCoin(btn, label) {
+      const rect = btn.getBoundingClientRect();
+      const el = document.createElement('div');
+      el.className = 'fly-coin';
+      el.textContent = label;
+      el.style.left = (rect.left + rect.width * (0.35 + Math.random() * 0.3)) + 'px';
+      el.style.top = rect.top + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 460);
+    }
+
+    function renderPlaces() {
+      const hundreds = Math.floor(total / 100);
+      const tens = Math.floor((total % 100) / 10);
+      const ones = total % 10;
+
+      totalNumEl.textContent = total;
+      kanjiNumEl.textContent = toKanji(total);
+      if (hundreds > 0) {
+        breakdownEl.textContent = `100が ${hundreds}こ！`;
+      } else {
+        breakdownEl.textContent = `10が ${tens}こ と 1が ${ones}こ`;
+      }
+
+      count100El.textContent = hundreds;
+      count10El.textContent = tens;
+      count1El.textContent = ones;
+
+      coins100El.innerHTML = '';
+      for (let i = 0; i < hundreds; i++) {
+        const box = document.createElement('div');
+        box.className = 'chest-100';
+        box.innerHTML = `<div class="chest-icon">👑</div><div class="chest-tag">100たからばこ</div>`;
+        coins100El.appendChild(box);
+      }
+
+      coins10El.innerHTML = '';
+      for (let i = 0; i < tens; i++) {
+        const c = document.createElement('div');
+        c.className = 'coin coin-10';
+        c.textContent = '10';
+        coins10El.appendChild(c);
+      }
+
+      coins1El.innerHTML = '';
+      for (let i = 0; i < ones; i++) {
+        const c = document.createElement('div');
+        c.className = 'coin coin-1';
+        c.textContent = '1';
+        coins1El.appendChild(c);
+      }
+    }
+
+    function renderDock() {
+      dockEl.innerHTML = '';
+
+      if (mode === 'otsukai') {
+        const undoBtn = document.createElement('button');
+        undoBtn.type = 'button';
+        undoBtn.className = 'sub-btn undo';
+        undoBtn.innerHTML = `<span class="sub-btn-big">-1</span><span class="sub-btn-small">1つもどす</span>`;
+        undoBtn.addEventListener('click', () => onRemoveOne());
+        dockEl.appendChild(undoBtn);
+      }
+
+      const mainBtn = document.createElement('button');
+      mainBtn.type = 'button';
+      mainBtn.className = 'tap-main-btn';
+      mainBtn.innerHTML = `<span class="tap-main-icon">🪙</span><span class="tap-main-text">1コイン いれる！</span>`;
+      mainBtn.addEventListener('click', () => onAdd(1, mainBtn));
+      dockEl.appendChild(mainBtn);
+
+      if (mode === 'otsukai') {
+        const plus10Btn = document.createElement('button');
+        plus10Btn.type = 'button';
+        plus10Btn.className = 'sub-btn plus10';
+        plus10Btn.innerHTML = `<span class="sub-btn-big">+10</span><span class="sub-btn-small">10コイン</span>`;
+        plus10Btn.addEventListener('click', () => onAdd(10, plus10Btn));
+        dockEl.appendChild(plus10Btn);
+      }
+    }
+
+    function startTimerLoop() {
+      if (timerRunning) return;
+      timerRunning = true;
+      startTs = performance.now();
+      const tick = now => {
+        if (!timerRunning) return;
+        elapsedMs = now - startTs;
+        missionValEl.textContent = (elapsedMs / 1000).toFixed(2) + 'びょう';
+        timerRaf = requestAnimationFrame(tick);
+      };
+      timerRaf = requestAnimationFrame(tick);
+    }
+
+    function stopTimerLoop() {
+      timerRunning = false;
+      cancelAnimationFrame(timerRaf);
+    }
+
+    function nextOtsukaiTarget() {
+      let next;
+      do {
+        next = 11 + Math.floor(Math.random() * 88); // 11〜98
+      } while (next === target);
+      target = next;
+      total = 0;
+      locked = false;
+      missionLabelEl.textContent = `おつかい (${clearedCount}クリア)`;
+      missionValEl.textContent = `${target} をつくろう`;
+      renderPlaces();
+    }
+
+    function onAdd(amount, btnEl) {
+      if (locked) return;
+
+      if (mode === 'rush100') {
+        startTimerLoop();
+      }
+
+      const prevTens = Math.floor(total / 10);
+      total = Math.min(100, total + amount);
+      const newTens = Math.floor(total / 10);
+
+      spawnFlyCoin(btnEl, amount === 10 ? '💰+10' : '🪙+1');
+      playCoinSfx(amount === 10);
+
+      if (amount === 1 && newTens > prevTens && total < 100) {
+        // 1が10枚貯まって10に進化！
+        playEvolveSfx();
+        flashCol(col10El);
+        showToast('✨ 1が10こで 10にへんしん！');
+      }
+
+      renderPlaces();
+
+      if (mode === 'rush100' && total >= 100) {
+        locked = true;
+        stopTimerLoop();
+        flashCol(col100El);
+        playWinSfx();
+        spawnConfetti();
+
+        const secStr = (elapsedMs / 1000).toFixed(2);
+        const bestRaw = localStorage.getItem(BEST_TIME_KEY);
+        let best = bestRaw ? Number(bestRaw) : Infinity;
+        if (elapsedMs < best) {
+          best = elapsedMs;
+          localStorage.setItem(BEST_TIME_KEY, String(best));
+        }
+
+        setTimeout(() => {
+          $('res-title').textContent = '👑 100の宝箱 かんせい！';
+          $('res-big').textContent = secStr + 'びょう';
+          $('res-sub').textContent = `ベストタイム: ${(best / 1000).toFixed(2)}びょう`;
+          overlayEl.classList.add('show');
+        }, 420);
+      } else if (mode === 'otsukai') {
+        if (total === target) {
+          locked = true;
+          clearedCount++;
+          playWinSfx();
+          spawnConfetti();
+          showToast(`🎉 ${target} ぴったりクリア！`);
+          setTimeout(nextOtsukaiTarget, 900);
+        } else if (total > target) {
+          showToast('💦 やりすぎ！「-1」でもどそう');
+        }
+      }
+    }
+
+    function onRemoveOne() {
+      if (locked || total <= 0) return;
+      total--;
+      playTone(440, 0.07, 'sine', 0.12);
+      renderPlaces();
+      if (mode === 'otsukai' && total === target) {
+        locked = true;
+        clearedCount++;
+        playWinSfx();
+        spawnConfetti();
+        showToast(`🎉 ${target} ぴったりクリア！`);
+        setTimeout(nextOtsukaiTarget, 900);
+      }
+    }
+
+    function resetGame() {
+      stopTimerLoop();
+      elapsedMs = 0;
+      total = 0;
+      locked = false;
+      overlayEl.classList.remove('show');
+      renderDock();
+
+      if (mode === 'rush100') {
+        missionLabelEl.textContent = 'タイム';
+        missionValEl.textContent = '0.00びょう';
+        renderPlaces();
+      } else {
+        clearedCount = 0;
+        nextOtsukaiTarget();
+      }
+    }
+
+    $('mode-group').addEventListener('click', e => {
+      const btn = e.target.closest('.mode-chip');
+      if (!btn) return;
+      mode = btn.dataset.mode;
+      document.querySelectorAll('#mode-group .mode-chip').forEach(c => c.classList.toggle('active', c === btn));
+      resetGame();
+    });
+
+    $('sound-btn').addEventListener('click', () => {
+      soundOn = !soundOn;
+      const b = $('sound-btn');
+      b.textContent = soundOn ? '🎵 ON' : '🔇 OFF';
+      b.classList.toggle('sound-on', soundOn);
+      if (soundOn) playCoinSfx(false);
+    });
+
+    $('retry-btn').addEventListener('click', resetGame);
+
+    resetGame();
+  </script>
+</body>
+</html>
