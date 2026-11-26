@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>つりあいシーソー！ | けいさんアドベンチャー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pri: #0288d1;
+      --pri-dark: #01579b;
+      --text: #263238;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: #e1f5fe;
+      color: var(--text);
+    }
+
+    .wrap {
+      height: 100dvh;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* 単色メインバー */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      margin: 0 -14px;
+      padding: 10px 14px;
+      background: var(--pri);
+      box-shadow: 0 3px 0 var(--pri-dark);
+    }
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+    }
+    .pill-btn:active { transform: translateY(2px); }
+    .pill-btn.sound-on { background: #fff8e1; color: #ef6c00; }
+    .game-title {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4vw, 24px);
+      color: #fff;
+      text-shadow: 0 2px 0 var(--pri-dark);
+      white-space: nowrap;
+    }
+
+    /* 難易度バー */
+    .mode-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .mode-chip {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: rgba(255,255,255,0.88);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #01579b;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    }
+    .mode-chip.active {
+      background: #ff9800;
+      color: #fff;
+      box-shadow: 0 3px 0 #e65100;
+    }
+
+    /* HUD */
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .hud-box {
+      background: #fff;
+      border: 2.5px solid #b3e5fc;
+      border-radius: 16px;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    .hud-lbl { font-size: 10.5px; font-weight: 800; color: #0277bd; }
+    .hud-val { font-size: clamp(18px, 4vw, 23px); font-weight: 900; color: #01579b; }
+    .hud-box.left .hud-val { color: #d84315; }
+    .hud-box.right .hud-val { color: #2e7d32; }
+
+    /* シーソーステージ */
+    .stage {
+      flex: 1;
+      min-height: 0;
+      background: #fff;
+      border: 4px solid #b3e5fc;
+      border-radius: 26px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 16px 12px 18px;
+      box-shadow: 0 10px 24px rgba(1, 87, 155, 0.08);
+    }
+
+    .status-msg {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(15px, 3.5vw, 20px);
+      font-weight: 900;
+      padding: 5px 16px;
+      border-radius: 999px;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .status-msg.tilt { background: #fff3e0; color: #e65100; }
+    .status-msg.over { background: #ffebee; color: #c62828; }
+    .status-msg.even {
+      background: #ffca28;
+      color: #4e342e;
+      font-size: clamp(20px, 5vw, 28px);
+      padding: 8px 24px;
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.45);
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn {
+      from { transform: translateX(-50%) scale(0.6); opacity: 0; }
+      to { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+
+    .seesaw-assembly {
+      position: relative;
+      width: min(92%, 520px);
+      height: 190px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      margin-top: 26px;
+    }
+
+    /* 支点（三角スタンド） */
+    .fulcrum {
+      width: 0;
+      height: 0;
+      border-left: 34px solid transparent;
+      border-right: 34px solid transparent;
+      border-bottom: 66px solid #ff9800;
+      position: relative;
+      z-index: 2;
+      filter: drop-shadow(0 4px 0 #e65100);
+    }
+    .fulcrum::after {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      border: 3px solid #e65100;
+    }
+
+    /* 傾く板 */
+    .beam {
+      position: absolute;
+      bottom: 62px;
+      left: 0;
+      right: 0;
+      height: 16px;
+      background: #8d6e63;
+      border: 3px solid #5d4037;
+      border-radius: 999px;
+      transform-origin: center center;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 12px;
+    }
+
+    .pan {
+      width: 44%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      flex-wrap: wrap-reverse;
+      gap: 6px;
+      padding-bottom: 14px;
+      min-height: 90px;
+      position: relative;
+    }
+    .pan-plate {
+      position: absolute;
+      bottom: 0;
+      left: 4%;
+      right: 4%;
+      height: 8px;
+      background: #cfd8dc;
+      border: 2px solid #78909c;
+      border-radius: 6px;
+    }
+
+    /* おもり（数値が大きいほど大きく見える） */
+    .weight {
+      width: var(--w-size, 48px);
+      height: var(--w-size, 48px);
+      border-radius: 14px;
+      border: 3px solid #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: var(--w-font, 20px);
+      color: #fff;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 2;
+      transition: transform 0.12s;
+    }
+    .weight.fixed-left { background: #ff7043; box-shadow: 0 4px 0 #d84315; }
+    .weight.fixed-right { background: #78909c; box-shadow: 0 4px 0 #455a64; }
+    .weight.added-right {
+      background: #4caf50;
+      box-shadow: 0 4px 0 #2e7d32;
+      cursor: pointer;
+    }
+    .weight.added-right:hover { transform: translateY(-2px); }
+    .weight.added-right::after {
+      content: '×';
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      color: #2e7d32;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+
+    /* 下部トレイ（選択肢） */
+    .tray-card {
+      flex-shrink: 0;
+      background: #fff;
+      border: 3px solid #b3e5fc;
+      border-radius: 22px;
+      padding: 12px 14px 14px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    }
+    .tray-hd {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .tray-lbl { font-size: 13px; font-weight: 800; color: #01579b; }
+    .reset-btn {
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 2px solid #b3e5fc;
+      background: #f1f8fe;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      color: #0277bd;
+      cursor: pointer;
+    }
+    .tray-items {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-height: 68px;
+    }
+    .weight.choice {
+      background: #29b6f6;
+      box-shadow: 0 5px 0 #0277bd;
+      cursor: pointer;
+    }
+    .weight.choice:active { transform: translateY(3px); box-shadow: 0 2px 0 #0277bd; }
+    .weight.choice.used {
+      opacity: 0.25;
+      pointer-events: none;
+      transform: scale(0.9);
+    }
+
+    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="wrap">
+    <div class="top-bar">
+      <a href="index.html" class="pill-btn">🏠 TOP</a>
+      <h1 class="game-title">⚖️ つりあいシーソー！</h1>
+      <button id="btn-sound" class="pill-btn sound-on" onclick="toggleSound()">🎵 ON</button>
+    </div>
+
+    <div class="mode-bar">
+      <button class="mode-chip active" data-diff="easy" onclick="setDiff('easy')">かんたん (〜10)</button>
+      <button class="mode-chip" data-diff="normal" onclick="setDiff('normal')">ふつう (〜20)</button>
+      <button class="mode-chip" data-diff="hard" onclick="setDiff('hard')">むずかしい (〜50)</button>
+    </div>
+
+    <div class="hud">
+      <div class="hud-box left">
+        <div class="hud-lbl">ひだりの おもさ</div>
+        <div class="hud-val" id="hud-left">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-lbl">せいかい数</div>
+        <div class="hud-val" id="hud-score">0もん</div>
+      </div>
+      <div class="hud-box right">
+        <div class="hud-lbl">みぎの おもさ</div>
+        <div class="hud-val" id="hud-right">0</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="status-msg tilt" id="status-msg">おなじ おもさに しよう！</div>
+      <div class="seesaw-assembly">
+        <div class="beam" id="beam">
+          <div class="pan" id="pan-left"><div class="pan-plate"></div></div>
+          <div class="pan" id="pan-right"><div class="pan-plate"></div></div>
+        </div>
+        <div class="fulcrum"></div>
+      </div>
+    </div>
+
+    <div class="tray-card">
+      <div class="tray-hd">
+        <span class="tray-lbl">👇 おもりを タップして みぎに のせよう（のせた おもりは タップで もどせるよ）</span>
+        <button class="reset-btn" onclick="resetCurrent()">↺ もどす</button>
+      </div>
+      <div class="tray-items" id="tray-items"></div>
+    </div>
+  </div>
+
+  <script>
+    let diff = 'easy';
+    let score = 0;
+    let soundOn = true;
+    let isCleared = false;
+
+    let leftVal = 10;
+    let rightBaseVal = 3;
+    let trayOptions = []; // { id, val, used }
+    let addedWeights = []; // { id, val }
+
+    class Sfx {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AC();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      tone(freq, dur, type = 'triangle', vol = 0.2, delay = 0) {
+        if (!soundOn) return;
+        this.init();
+        const t = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + dur);
+      }
+      put() { this.tone(523.25, 0.1, 'triangle', 0.22); }
+      remove() { this.tone(392.0, 0.08, 'sine', 0.16); }
+      clear() {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.22, 'triangle', 0.24, i * 0.08));
+      }
+    }
+    const sfx = new Sfx();
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      const btn = document.getElementById('btn-sound');
+      btn.textContent = soundOn ? '🎵 ON' : '🔇 OFF';
+      btn.classList.toggle('sound-on', soundOn);
+    }
+
+    function setDiff(d) {
+      diff = d;
+      document.querySelectorAll('.mode-chip').forEach(c => c.classList.toggle('active', c.dataset.diff === d));
+      newProblem();
+    }
+
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function weightStyleVars(val, maxScaleBase) {
+      // 数字が大きいほど見た目も大きくする
+      const ratio = Math.min(1, Math.max(0, val / maxScaleBase));
+      const size = Math.round(42 + ratio * 24);
+      const font = Math.round(17 + ratio * 9);
+      return `--w-size:${size}px;--w-font:${font}px;`;
+    }
+
+    function newProblem() {
+      isCleared = false;
+      stopConfetti();
+      addedWeights = [];
+
+      let maxTarget = 10;
+      let neededParts = [];
+      let totalChoices = 4;
+
+      if (diff === 'easy') {
+        maxTarget = 10;
+        leftVal = randInt(4, 10);
+        rightBaseVal = randInt(1, leftVal - 1);
+        neededParts = [leftVal - rightBaseVal];
+        totalChoices = 4;
+      } else if (diff === 'normal') {
+        maxTarget = 20;
+        leftVal = randInt(8, 20);
+        rightBaseVal = randInt(1, leftVal - 3);
+        const need = leftVal - rightBaseVal;
+        if (need >= 4 && Math.random() < 0.75) {
+          const p1 = randInt(1, need - 1);
+          neededParts = [p1, need - p1];
+        } else {
+          neededParts = [need];
+        }
+        totalChoices = 5;
+      } else {
+        maxTarget = 50;
+        leftVal = randInt(18, 50);
+        rightBaseVal = randInt(2, Math.floor(leftVal * 0.55));
+        const need = leftVal - rightBaseVal;
+        const p1 = randInt(2, Math.max(3, Math.floor(need * 0.5)));
+        const rem = need - p1;
+        if (rem >= 5 && Math.random() < 0.7) {
+          const p2 = randInt(2, rem - 2);
+          neededParts = [p1, p2, rem - p2];
+        } else {
+          neededParts = [p1, rem];
+        }
+        totalChoices = 6;
+      }
+
+      const opts = neededParts.slice();
+      while (opts.length < totalChoices) {
+        const dMax = diff === 'easy' ? 9 : (diff === 'normal' ? 15 : 25);
+        const cand = randInt(1, dMax);
+        if (!opts.includes(cand) || opts.length >= totalChoices - 1) {
+          opts.push(cand);
+        }
+      }
+      shuffle(opts);
+      trayOptions = opts.map((v, idx) => ({ id: 'w_' + idx + '_' + Date.now(), val: v, used: false }));
+      renderAll();
+    }
+
+    function addWeight(id) {
+      if (isCleared) return;
+      const opt = trayOptions.find(o => o.id === id);
+      if (!opt || opt.used) return;
+      opt.used = true;
+      addedWeights.push({ id: opt.id, val: opt.val });
+      sfx.put();
+      renderAll();
+      checkBalance();
+    }
+
+    function removeWeight(id) {
+      if (isCleared) return;
+      const idx = addedWeights.findIndex(w => w.id === id);
+      if (idx < 0) return;
+      addedWeights.splice(idx, 1);
+      const opt = trayOptions.find(o => o.id === id);
+      if (opt) opt.used = false;
+      sfx.remove();
+      renderAll();
+    }
+
+    function resetCurrent() {
+      if (isCleared) return;
+      addedWeights = [];
+      trayOptions.forEach(o => o.used = false);
+      sfx.remove();
+      renderAll();
+    }
+
+    function renderAll() {
+      const maxBase = diff === 'easy' ? 10 : (diff === 'normal' ? 20 : 50);
+      const rightTotal = rightBaseVal + addedWeights.reduce((s, w) => s + w.val, 0);
+
+      document.getElementById('hud-left').textContent = leftVal;
+      document.getElementById('hud-right').textContent = rightTotal;
+      document.getElementById('hud-score').textContent = score + 'もん';
+
+      // 左皿
+      const panL = document.getElementById('pan-left');
+      panL.innerHTML = '<div class="pan-plate"></div>' +
+        `<div class="weight fixed-left" style="${weightStyleVars(leftVal, maxBase)}">${leftVal}</div>`;
+
+      // 右皿
+      const panR = document.getElementById('pan-right');
+      let rHtml = '<div class="pan-plate"></div>' +
+        `<div class="weight fixed-right" style="${weightStyleVars(rightBaseVal, maxBase)}">${rightBaseVal}</div>`;
+      addedWeights.forEach(w => {
+        rHtml += `<div class="weight added-right" style="${weightStyleVars(w.val, maxBase)}" onclick="removeWeight('${w.id}')">${w.val}</div>`;
+      });
+      panR.innerHTML = rHtml;
+
+      // 傾き角度の計算
+      const diffVal = rightTotal - leftVal;
+      const angle = Math.max(-17, Math.min(17, diffVal * 1.6));
+      document.getElementById('beam').style.transform = `rotate(${angle}deg)`;
+
+      // メッセージ
+      const msg = document.getElementById('status-msg');
+      if (diffVal === 0) {
+        msg.className = 'status-msg even';
+        msg.textContent = '✨ ぴったり！ つりあったよ！';
+      } else if (diffVal < 0) {
+        msg.className = 'status-msg tilt';
+        msg.textContent = `みぎに あと「${Math.abs(diffVal)}」のせよう！`;
+      } else {
+        msg.className = 'status-msg over';
+        msg.textContent = `ちょっと おもすぎ！ おもりを タップして もどそう`;
+      }
+
+      // 下部トレイ
+      const tray = document.getElementById('tray-items');
+      tray.innerHTML = trayOptions.map(o =>
+        `<button class="weight choice${o.used ? ' used' : ''}" style="${weightStyleVars(o.val, maxBase)}" onclick="addWeight('${o.id}')">${o.val}</button>`
+      ).join('');
+    }
+
+    function checkBalance() {
+      const rightTotal = rightBaseVal + addedWeights.reduce((s, w) => s + w.val, 0);
+      if (rightTotal === leftVal) {
+        isCleared = true;
+        score++;
+        document.getElementById('hud-score').textContent = score + 'もん';
+        sfx.clear();
+        startConfetti();
+        setTimeout(() => {
+          newProblem();
+        }, 1450);
+      }
+    }
+
+    // 紙吹雪
+    let confettiPieces = [], confettiRaf = null;
+    function startConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#ff7043', '#4caf50', '#29b6f6', '#ffca28', '#ab47bc'];
+      confettiPieces = Array.from({ length: 80 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height * 0.6,
+        w: 8 + Math.random() * 7,
+        h: 6 + Math.random() * 6,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        vy: 3 + Math.random() * 4,
+        vx: (Math.random() - 0.5) * 2.5,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.2
+      }));
+      const loop = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confettiPieces.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+          ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+        });
+        confettiRaf = requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    function stopConfetti() {
+      if (confettiRaf) cancelAnimationFrame(confettiRaf);
+      confettiRaf = null;
+      const c = document.getElementById('confetti-canvas');
+      c.getContext('2d').clearRect(0, 0, c.width, c.height);
+    }
+
+    newProblem();
+  </script>
+</body>
+</html>
