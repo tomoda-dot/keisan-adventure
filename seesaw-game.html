@@ -1,20 +1,31 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>つりあいシーソー！ | けいさんアドベンチャー</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --pri: #0288d1;
       --pri-dark: #01579b;
       --text: #263238;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
-    html, body {
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html,
+    body {
       height: 100%;
       overflow: hidden;
       font-family: 'M PLUS Rounded 1c', sans-serif;
@@ -44,6 +55,7 @@
       background: var(--pri);
       box-shadow: 0 3px 0 var(--pri-dark);
     }
+
     .pill-btn {
       display: inline-flex;
       align-items: center;
@@ -58,12 +70,21 @@
       font-size: 13px;
       text-decoration: none;
       cursor: pointer;
-      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
     }
-    .pill-btn:active { transform: translateY(2px); }
-    .pill-btn.sound-on { background: #fff8e1; color: #ef6c00; }
+
+    .pill-btn:active {
+      transform: translateY(2px);
+    }
+
+    .pill-btn.sound-on {
+      background: #fff8e1;
+      color: #ef6c00;
+    }
+
     .game-title {
-      font-family: 'Potta One', cursive;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-weight: 900;
       font-size: clamp(18px, 4vw, 24px);
       color: #fff;
       text-shadow: 0 2px 0 var(--pri-dark);
@@ -77,18 +98,20 @@
       justify-content: center;
       flex-shrink: 0;
     }
+
     .mode-chip {
       padding: 6px 14px;
       border-radius: 999px;
       border: 2px solid #fff;
-      background: rgba(255,255,255,0.88);
+      background: rgba(255, 255, 255, 0.88);
       font-family: inherit;
       font-size: 12.5px;
       font-weight: 800;
       color: #01579b;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
     }
+
     .mode-chip.active {
       background: #ff9800;
       color: #fff;
@@ -102,6 +125,7 @@
       gap: 8px;
       flex-shrink: 0;
     }
+
     .hud-box {
       background: #fff;
       border: 2.5px solid #b3e5fc;
@@ -109,10 +133,26 @@
       padding: 6px 8px;
       text-align: center;
     }
-    .hud-lbl { font-size: 10.5px; font-weight: 800; color: #0277bd; }
-    .hud-val { font-size: clamp(18px, 4vw, 23px); font-weight: 900; color: #01579b; }
-    .hud-box.left .hud-val { color: #d84315; }
-    .hud-box.right .hud-val { color: #2e7d32; }
+
+    .hud-lbl {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #0277bd;
+    }
+
+    .hud-val {
+      font-size: clamp(18px, 4vw, 23px);
+      font-weight: 900;
+      color: #01579b;
+    }
+
+    .hud-box.left .hud-val {
+      color: #d84315;
+    }
+
+    .hud-box.right .hud-val {
+      color: #2e7d32;
+    }
 
     /* シーソーステージ */
     .stage {
@@ -143,8 +183,17 @@
       white-space: nowrap;
       z-index: 10;
     }
-    .status-msg.tilt { background: #fff3e0; color: #e65100; }
-    .status-msg.over { background: #ffebee; color: #c62828; }
+
+    .status-msg.tilt {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .status-msg.over {
+      background: #ffebee;
+      color: #c62828;
+    }
+
     .status-msg.even {
       background: #ffca28;
       color: #4e342e;
@@ -153,9 +202,17 @@
       box-shadow: 0 4px 12px rgba(255, 193, 7, 0.45);
       animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
+
     @keyframes popIn {
-      from { transform: translateX(-50%) scale(0.6); opacity: 0; }
-      to { transform: translateX(-50%) scale(1); opacity: 1; }
+      from {
+        transform: translateX(-50%) scale(0.6);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+      }
     }
 
     .seesaw-assembly {
@@ -179,6 +236,7 @@
       z-index: 2;
       filter: drop-shadow(0 4px 0 #e65100);
     }
+
     .fulcrum::after {
       content: '';
       position: absolute;
@@ -221,6 +279,7 @@
       min-height: 90px;
       position: relative;
     }
+
     .pan-plate {
       position: absolute;
       bottom: 0;
@@ -244,19 +303,32 @@
       font-weight: 900;
       font-size: var(--w-font, 20px);
       color: #fff;
-      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
       position: relative;
       z-index: 2;
       transition: transform 0.12s;
     }
-    .weight.fixed-left { background: #ff7043; box-shadow: 0 4px 0 #d84315; }
-    .weight.fixed-right { background: #78909c; box-shadow: 0 4px 0 #455a64; }
+
+    .weight.fixed-left {
+      background: #ff7043;
+      box-shadow: 0 4px 0 #d84315;
+    }
+
+    .weight.fixed-right {
+      background: #78909c;
+      box-shadow: 0 4px 0 #455a64;
+    }
+
     .weight.added-right {
       background: #4caf50;
       box-shadow: 0 4px 0 #2e7d32;
       cursor: pointer;
     }
-    .weight.added-right:hover { transform: translateY(-2px); }
+
+    .weight.added-right:hover {
+      transform: translateY(-2px);
+    }
+
     .weight.added-right::after {
       content: '×';
       position: absolute;
@@ -271,7 +343,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     }
 
     /* 下部トレイ（選択肢） */
@@ -281,15 +353,22 @@
       border: 3px solid #b3e5fc;
       border-radius: 22px;
       padding: 12px 14px 14px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
     }
+
     .tray-hd {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
     }
-    .tray-lbl { font-size: 13px; font-weight: 800; color: #01579b; }
+
+    .tray-lbl {
+      font-size: 13px;
+      font-weight: 800;
+      color: #01579b;
+    }
+
     .reset-btn {
       padding: 4px 12px;
       border-radius: 999px;
@@ -301,6 +380,7 @@
       color: #0277bd;
       cursor: pointer;
     }
+
     .tray-items {
       display: flex;
       align-items: center;
@@ -309,6 +389,7 @@
       flex-wrap: wrap;
       min-height: 68px;
     }
+
     .weight.choice {
       --w-size: 54px;
       --w-font: 22px;
@@ -316,16 +397,27 @@
       box-shadow: 0 5px 0 #0277bd;
       cursor: pointer;
     }
-    .weight.choice:active { transform: translateY(3px); box-shadow: 0 2px 0 #0277bd; }
+
+    .weight.choice:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #0277bd;
+    }
+
     .weight.choice.used {
       opacity: 0.25;
       pointer-events: none;
       transform: scale(0.9);
     }
 
-    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 60;
+    }
   </style>
 </head>
+
 <body>
   <canvas id="confetti-canvas"></canvas>
 
@@ -361,8 +453,12 @@
       <div class="status-msg tilt" id="status-msg">おなじ おもさに しよう！</div>
       <div class="seesaw-assembly">
         <div class="beam" id="beam">
-          <div class="pan" id="pan-left"><div class="pan-plate"></div></div>
-          <div class="pan" id="pan-right"><div class="pan-plate"></div></div>
+          <div class="pan" id="pan-left">
+            <div class="pan-plate"></div>
+          </div>
+          <div class="pan" id="pan-right">
+            <div class="pan-plate"></div>
+          </div>
         </div>
         <div class="fulcrum"></div>
       </div>
@@ -638,7 +734,7 @@
         confettiPieces.forEach(p => {
           p.x += p.vx; p.y += p.vy; p.rot += p.vr;
           ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-          ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+          ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
         });
         confettiRaf = requestAnimationFrame(loop);
       };
@@ -654,4 +750,5 @@
     newProblem();
   </script>
 </body>
+
 </html>
