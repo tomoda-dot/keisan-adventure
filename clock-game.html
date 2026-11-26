@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>とけいマスター！ | けいさんアドベンチャー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pri: #00897b;
+      --pri-dark: #004d40;
+      --bg: #e0f2f1;
+      --text: #263238;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      height: 100dvh;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* 単色メインバー */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      margin: 0 -14px;
+      padding: 10px 14px;
+      background: var(--pri);
+      box-shadow: 0 3px 0 var(--pri-dark);
+    }
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+    }
+    .pill-btn:active { transform: translateY(2px); }
+    .pill-btn.sound-on { background: #fff8e1; color: #ef6c00; }
+    .game-title {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4vw, 24px);
+      color: #fff;
+      text-shadow: 0 2px 0 var(--pri-dark);
+      white-space: nowrap;
+    }
+
+    /* 難易度バー */
+    .controls-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .chip-group {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,0.8);
+      padding: 4px;
+      border-radius: 999px;
+      border: 2px solid #80cbc4;
+    }
+    .mode-chip {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: #546e7a;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .mode-chip.active {
+      background: var(--pri);
+      color: #fff;
+      box-shadow: 0 2px 0 var(--pri-dark);
+    }
+
+    /* お題カード */
+    .quest-card {
+      flex-shrink: 0;
+      background: #fff;
+      border-radius: 20px;
+      border: 3px solid #80cbc4;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 4px 0 #80cbc4;
+    }
+    .quest-main {
+      flex: 1;
+      text-align: center;
+    }
+    .quest-text {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4.4vw, 25px);
+      color: #004d40;
+      line-height: 1.3;
+    }
+    .quest-feedback {
+      font-size: 13px;
+      font-weight: 900;
+      color: #00897b;
+      min-height: 20px;
+      margin-top: 2px;
+    }
+    .quest-feedback.bad { color: #e53935; }
+    .quest-score {
+      background: #e0f2f1;
+      border: 2px solid #80cbc4;
+      border-radius: 14px;
+      padding: 6px 10px;
+      text-align: center;
+      min-width: 78px;
+    }
+    .qs-lbl { font-size: 10px; font-weight: 800; color: #546e7a; }
+    .qs-val { font-size: 18px; font-weight: 900; color: #004d40; }
+
+    /* 時計ステージ */
+    .clock-stage {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .clock-svg {
+      width: min(100%, 340px);
+      height: min(100%, 340px);
+      max-height: 100%;
+      touch-action: none;
+      filter: drop-shadow(0 10px 18px rgba(0, 77, 64, 0.16));
+      overflow: visible;
+    }
+    .clock-svg.glow .hand-line {
+      filter: drop-shadow(0 0 10px #ffd54f);
+    }
+    .hand-hit {
+      cursor: grab;
+    }
+    .hand-hit:active {
+      cursor: grabbing;
+    }
+
+    /* 下部操作ドック */
+    .dock {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .nudge-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .nudge-btn {
+      padding: 9px 4px;
+      border-radius: 14px;
+      border: 3px solid #fff;
+      background: #4db6ac;
+      color: #fff;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: clamp(12px, 3vw, 15px);
+      cursor: pointer;
+      box-shadow: 0 4px 0 #00695c;
+    }
+    .nudge-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #00695c; }
+    .nudge-btn.hour { background: #ff8a65; box-shadow: 0 4px 0 #d84315; }
+    .nudge-btn.hour:active { box-shadow: 0 1px 0 #d84315; }
+
+    .check-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 20px;
+      border: 4px solid #fff;
+      background: linear-gradient(180deg, #ffca28 0%, #ffa000 100%);
+      color: #fff;
+      font-family: 'Potta One', cursive;
+      font-size: clamp(20px, 5vw, 26px);
+      text-shadow: 0 2px 0 #e65100;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #e65100;
+    }
+    .check-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #e65100; }
+
+    /* 紙吹雪 */
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 14px;
+      border-radius: 3px;
+      animation: fall 1.2s ease-out forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(540deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top-bar">
+      <a href="index.html" class="pill-btn">🏠 TOP</a>
+      <h1 class="game-title">🕒 とけいマスター！</h1>
+      <button id="sound-btn" class="pill-btn sound-on" type="button">🎵 ON</button>
+    </header>
+
+    <div class="controls-row">
+      <div class="chip-group" id="diff-group">
+        <button class="mode-chip active" data-diff="easy" type="button">かんたん</button>
+        <button class="mode-chip" data-diff="normal" type="button">ふつう</button>
+        <button class="mode-chip" data-diff="hard" type="button">むずかしい</button>
+      </div>
+    </div>
+
+    <section class="quest-card">
+      <div class="quest-main">
+        <div class="quest-text" id="quest-text">3時 00分 にしよう！</div>
+        <div class="quest-feedback" id="quest-feedback">はりを まわして「できた！」をおそう</div>
+      </div>
+      <div class="quest-score">
+        <div class="qs-lbl">せいかい</div>
+        <div class="qs-val" id="hud-score">0もん</div>
+      </div>
+    </section>
+
+    <main class="clock-stage">
+      <svg class="clock-svg" id="clock-svg" viewBox="0 0 320 320">
+        <!-- 外枠・文字盤 -->
+        <circle cx="160" cy="160" r="146" fill="#ffffff" stroke="#00897b" stroke-width="10"/>
+        <circle cx="160" cy="160" r="138" fill="#ffffff" stroke="#b2dfdb" stroke-width="2"/>
+        <g id="ticks-layer"></g>
+        <g id="numbers-layer"></g>
+
+        <!-- 短い針（時針） -->
+        <g id="hour-hand-group" transform="rotate(0 160 160)">
+          <line class="hand-line" x1="160" y1="168" x2="160" y2="86" stroke="#ff7043" stroke-width="11" stroke-linecap="round"/>
+          <line class="hand-hit" data-hand="hour" x1="160" y1="168" x2="160" y2="80" stroke="transparent" stroke-width="34" stroke-linecap="round"/>
+        </g>
+
+        <!-- 長い針（分針） -->
+        <g id="min-hand-group" transform="rotate(0 160 160)">
+          <line class="hand-line" x1="160" y1="172" x2="160" y2="44" stroke="#00897b" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="160" cy="46" r="7" fill="#00897b" opacity="0.25" pointer-events="none"/>
+          <line class="hand-hit" data-hand="min" x1="160" y1="172" x2="160" y2="36" stroke="transparent" stroke-width="36" stroke-linecap="round"/>
+        </g>
+
+        <!-- 中央のピン -->
+        <circle cx="160" cy="160" r="10" fill="#ffb300" stroke="#ffffff" stroke-width="3"/>
+      </svg>
+    </main>
+
+    <section class="dock">
+      <div class="nudge-row">
+        <button class="nudge-btn hour" type="button" onclick="nudge(-60)">◀ 1じかん</button>
+        <button class="nudge-btn hour" type="button" onclick="nudge(60)">1じかん ▶</button>
+        <button class="nudge-btn" type="button" onclick="nudge(-5)">◀ 5ふん</button>
+        <button class="nudge-btn" type="button" onclick="nudge(5)">5ふん ▶</button>
+      </div>
+      <button class="check-btn" id="check-btn" type="button">✨ できた！</button>
+    </section>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const clockSvg = $('clock-svg');
+    const hourGroup = $('hour-hand-group');
+    const minGroup = $('min-hand-group');
+    const questTextEl = $('quest-text');
+    const questFbEl = $('quest-feedback');
+    const hudScoreEl = $('hud-score');
+
+    let diff = 'easy';
+    let soundOn = true;
+    let audioCtx = null;
+
+    let currentTotalMin = 0; // 0〜719
+    let targetTotalMin = 180; // 3:00
+    let score = 0;
+    let locked = false;
+
+    let draggingHand = null;
+    let lastAngleDeg = 0;
+
+    function addAdventureCoins(earnedCoins, solvedDelta = 0) {
+      try {
+        const raw = localStorage.getItem('KEISAN_ADVENTURE_SAVE_V1');
+        const st = raw ? JSON.parse(raw) : { coins: 0, stars: 0, totalSolved: 0 };
+        st.coins = (st.coins || 0) + earnedCoins;
+        if (solvedDelta > 0) st.totalSolved = (st.totalSolved || 0) + solvedDelta;
+        localStorage.setItem('KEISAN_ADVENTURE_SAVE_V1', JSON.stringify(st));
+        return st.coins;
+      } catch (e) { return 0; }
+    }
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, dur, type = 'sine', gainVal = 0.14, delay = 0) {
+      if (!soundOn) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime + delay;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(gainVal, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + dur);
+    }
+
+    function playTickSfx() {
+      playTone(880, 0.03, 'triangle', 0.07);
+    }
+
+    function playChimeSfx() {
+      // 学校チャイム風
+      playTone(587.33, 0.18, 'triangle', 0.18, 0);
+      playTone(739.99, 0.18, 'triangle', 0.18, 0.14);
+      playTone(659.25, 0.18, 'triangle', 0.18, 0.28);
+      playTone(440.0, 0.3, 'triangle', 0.18, 0.42);
+    }
+
+    function playWrongSfx() {
+      playTone(230, 0.12, 'sawtooth', 0.1, 0);
+      playTone(185, 0.16, 'sawtooth', 0.1, 0.1);
+    }
+
+    function spawnConfetti() {
+      const box = $('confetti');
+      const colors = ['#ffca28', '#00897b', '#ff7043', '#42a5f5', '#ab47bc'];
+      for (let i = 0; i < 26; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-piece';
+        p.style.left = (10 + Math.random() * 80) + 'vw';
+        p.style.top = (-10 - Math.random() * 20) + 'px';
+        p.style.background = colors[i % colors.length];
+        p.style.animationDuration = (0.85 + Math.random() * 0.6) + 's';
+        box.appendChild(p);
+        setTimeout(() => p.remove(), 1600);
+      }
+    }
+
+    function buildClockFace() {
+      const ticks = $('ticks-layer');
+      const nums = $('numbers-layer');
+      const cx = 160, cy = 160;
+
+      for (let m = 0; m < 60; m++) {
+        const angle = (m * 6) * Math.PI / 180;
+        const isHour = m % 5 === 0;
+        const r1 = isHour ? 123 : 129;
+        const r2 = 135;
+        const x1 = cx + Math.sin(angle) * r1;
+        const y1 = cy - Math.cos(angle) * r1;
+        const x2 = cx + Math.sin(angle) * r2;
+        const y2 = cy - Math.cos(angle) * r2;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', isHour ? '#00695c' : '#b0bec5');
+        line.setAttribute('stroke-width', isHour ? '3.5' : '1.5');
+        line.setAttribute('stroke-linecap', 'round');
+        ticks.appendChild(line);
+      }
+
+      for (let h = 1; h <= 12; h++) {
+        const angle = (h * 30) * Math.PI / 180;
+        const r = 104;
+        const x = cx + Math.sin(angle) * r;
+        const y = cy - Math.cos(angle) * r;
+
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', x);
+        txt.setAttribute('y', y);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('dominant-baseline', 'central');
+        txt.setAttribute('font-family', 'Potta One, cursive');
+        txt.setAttribute('font-size', '22');
+        txt.setAttribute('fill', '#263238');
+        txt.textContent = h;
+        nums.appendChild(txt);
+      }
+    }
+
+    function normalizeMin(m) {
+      return ((m % 720) + 720) % 720;
+    }
+
+    function formatClock(totalM) {
+      const norm = normalizeMin(Math.round(totalM));
+      let h = Math.floor(norm / 60);
+      if (h === 0) h = 12;
+      const m = norm % 60;
+      const mStr = m < 10 ? '0' + m : String(m);
+      return `${h}時 ${mStr}分`;
+    }
+
+    function renderHands() {
+      const norm = normalizeMin(currentTotalMin);
+      const minAngle = (norm % 60) * 6;
+      const hourAngle = (norm / 720) * 360;
+      minGroup.setAttribute('transform', `rotate(${minAngle} 160 160)`);
+      hourGroup.setAttribute('transform', `rotate(${hourAngle} 160 160)`);
+    }
+
+    function newProblem() {
+      locked = false;
+      clockSvg.classList.remove('glow');
+      questFbEl.className = 'quest-feedback';
+      questFbEl.textContent = 'はりを まわして「できた！」をおそう';
+
+      if (diff === 'easy') {
+        const h = 1 + Math.floor(Math.random() * 12);
+        const m = Math.random() < 0.5 ? 0 : 30;
+        targetTotalMin = normalizeMin((h % 12) * 60 + m);
+        currentTotalMin = 0; // 12:00からスタート
+        questTextEl.textContent = `${h}時 ${m === 0 ? '00' : '30'}分 にしよう！`;
+      } else if (diff === 'normal') {
+        const h = 1 + Math.floor(Math.random() * 12);
+        const m = Math.floor(Math.random() * 12) * 5;
+        targetTotalMin = normalizeMin((h % 12) * 60 + m);
+        currentTotalMin = 0;
+        questTextEl.textContent = `${h}時 ${m < 10 ? '0' + m : m}分 にしよう！`;
+      } else {
+        // むずかしい：経過時間・逆算
+        const startH = 1 + Math.floor(Math.random() * 12);
+        const startM = Math.floor(Math.random() * 12) * 5;
+        const startTotal = normalizeMin((startH % 12) * 60 + startM);
+        const deltas = [10, 15, 20, 25, 30, 40, 45];
+        const delta = deltas[Math.floor(Math.random() * deltas.length)];
+        const isAfter = Math.random() < 0.6;
+        targetTotalMin = normalizeMin(isAfter ? startTotal + delta : startTotal - delta);
+        currentTotalMin = startTotal;
+        const startMStr = startM < 10 ? '0' + startM : startM;
+        questTextEl.textContent = `いま ${startH}時${startMStr}分。${delta}分 ${isAfter ? 'あと' : 'まえ'}は 何時？`;
+      }
+
+      renderHands();
+    }
+
+    window.nudge = function(deltaMin) {
+      if (locked) return;
+      currentTotalMin = normalizeMin(Math.round(currentTotalMin / 5) * 5 + deltaMin);
+      playTickSfx();
+      renderHands();
+    };
+
+    function getPointerAngleDeg(clientX, clientY) {
+      const rect = clockSvg.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      let deg = Math.atan2(clientX - cx, -(clientY - cy)) * (180 / Math.PI);
+      if (deg < 0) deg += 360;
+      return deg;
+    }
+
+    function onPointerDown(e) {
+      if (locked) return;
+      const hit = e.target.closest('.hand-hit');
+      if (hit) {
+        draggingHand = hit.dataset.hand;
+      } else {
+        // 文字盤タップでも分針をつかめるようにする
+        draggingHand = 'min';
+      }
+      lastAngleDeg = getPointerAngleDeg(e.clientX, e.clientY);
+      clockSvg.setPointerCapture(e.pointerId);
+    }
+
+    function onPointerMove(e) {
+      if (!draggingHand || locked) return;
+      const curDeg = getPointerAngleDeg(e.clientX, e.clientY);
+      let deltaDeg = curDeg - lastAngleDeg;
+      if (deltaDeg > 180) deltaDeg -= 360;
+      if (deltaDeg < -180) deltaDeg += 360;
+      lastAngleDeg = curDeg;
+
+      if (draggingHand === 'min') {
+        currentTotalMin = normalizeMin(currentTotalMin + deltaDeg / 6);
+      } else {
+        currentTotalMin = normalizeMin(currentTotalMin + deltaDeg * 2);
+      }
+      renderHands();
+    }
+
+    function onPointerUp(e) {
+      if (!draggingHand) return;
+      draggingHand = null;
+      // 5分刻みに軽くスナップ（子供が合わせやすい）
+      currentTotalMin = normalizeMin(Math.round(currentTotalMin / 5) * 5);
+      playTickSfx();
+      renderHands();
+      try { clockSvg.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+
+    clockSvg.addEventListener('pointerdown', onPointerDown);
+    clockSvg.addEventListener('pointermove', onPointerMove);
+    clockSvg.addEventListener('pointerup', onPointerUp);
+    clockSvg.addEventListener('pointercancel', onPointerUp);
+
+    $('check-btn').addEventListener('click', () => {
+      if (locked) return;
+      const snapped = normalizeMin(Math.round(currentTotalMin / 5) * 5);
+      if (snapped === targetTotalMin) {
+        locked = true;
+        score++;
+        hudScoreEl.textContent = score + 'もん';
+        const earned = diff === 'easy' ? 3 : diff === 'normal' ? 5 : 8;
+        addAdventureCoins(earned, 1);
+
+        clockSvg.classList.add('glow');
+        questFbEl.className = 'quest-feedback';
+        questFbEl.textContent = `✨ せいかい！（${formatClock(snapped)}） 🪙 +${earned}コイン！`;
+        playChimeSfx();
+        spawnConfetti();
+        setTimeout(newProblem, 1500);
+      } else {
+        playWrongSfx();
+        questFbEl.className = 'quest-feedback bad';
+        questFbEl.textContent = `おしい！ いまは ${formatClock(snapped)} だよ`;
+      }
+    });
+
+    $('diff-group').addEventListener('click', e => {
+      const btn = e.target.closest('.mode-chip');
+      if (!btn) return;
+      diff = btn.dataset.diff;
+      document.querySelectorAll('#diff-group .mode-chip').forEach(c => c.classList.toggle('active', c === btn));
+      newProblem();
+    });
+
+    $('sound-btn').addEventListener('click', () => {
+      soundOn = !soundOn;
+      const b = $('sound-btn');
+      b.textContent = soundOn ? '🎵 ON' : '🔇 OFF';
+      b.classList.toggle('sound-on', soundOn);
+      if (soundOn) playTickSfx();
+    });
+
+    buildClockFace();
+    newProblem();
+  </script>
+</body>
+</html>
