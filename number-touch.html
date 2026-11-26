@@ -33,19 +33,23 @@
       height: 100dvh;
       max-width: 760px;
       margin: 0 auto;
-      padding: 10px 12px 14px;
+      padding: 0 12px 14px;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    /* Header */
+    /* Header (単色メインバー) */
     .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
       flex-shrink: 0;
+      margin: 0 -12px;
+      padding: 10px 14px;
+      background: #ff6b9d;
+      box-shadow: 0 3px 0 #e0487b;
     }
     .pill-btn {
       display: inline-flex;
@@ -53,25 +57,25 @@
       gap: 4px;
       padding: 6px 12px;
       border-radius: 999px;
-      border: 2.5px solid #fff;
-      background: rgba(255,255,255,0.92);
+      border: 2px solid #fff;
+      background: #fff;
       color: var(--text);
       font-family: inherit;
       font-weight: 800;
       font-size: 13px;
       text-decoration: none;
       cursor: pointer;
-      box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
       transition: transform 0.1s;
     }
     .pill-btn:active { transform: translateY(2px); }
-    .pill-btn.sound-on { background: #fff3e0; border-color: #ffb74d; color: #e65100; }
+    .pill-btn.sound-on { background: #fff3e0; border-color: #fff; color: #e65100; }
 
     .game-title {
       font-family: 'Potta One', cursive;
-      font-size: clamp(18px, 4vw, 26px);
-      color: #ff4081;
-      text-shadow: 2px 2px 0 #fff, 0 3px 6px rgba(255,64,129,0.2);
+      font-size: clamp(18px, 4vw, 25px);
+      color: #fff;
+      text-shadow: 0 2px 0 #c51162;
       text-align: center;
       white-space: nowrap;
     }
@@ -118,7 +122,7 @@
       transition: all 0.12s;
     }
     .mode-chip.active {
-      background: linear-gradient(180deg, #ff80ab 0%, #ff4081 100%);
+      background: #ff4081;
       color: #fff;
       box-shadow: 0 3px 0 #c51162;
     }
