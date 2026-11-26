@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>かずバブル！ | けいさんアドベンチャー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pri: #7e57c2;
+      --pri-dark: #512da8;
+      --bg: #f3e5f5;
+      --text: #263238;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      height: 100dvh;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* 単色メインバー */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+      margin: 0 -14px;
+      padding: 10px 14px;
+      background: var(--pri);
+      box-shadow: 0 3px 0 var(--pri-dark);
+    }
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+    }
+    .pill-btn:active { transform: translateY(2px); }
+    .pill-btn.sound-on { background: #fff8e1; color: #ef6c00; }
+    .game-title {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4vw, 24px);
+      color: #fff;
+      text-shadow: 0 2px 0 var(--pri-dark);
+      white-space: nowrap;
+    }
+
+    /* 設定バー */
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .chip-group {
+      display: flex;
+      gap: 4px;
+      background: rgba(255,255,255,0.75);
+      padding: 4px;
+      border-radius: 999px;
+      border: 2px solid #d1c4e9;
+    }
+    .mode-chip {
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: #546e7a;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .mode-chip.active {
+      background: var(--pri);
+      color: #fff;
+      box-shadow: 0 2px 0 var(--pri-dark);
+    }
+
+    /* HUD */
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .hud-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 5px 6px;
+      text-align: center;
+      border: 2px solid #d1c4e9;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.05);
+    }
+    .hud-label { font-size: 10px; font-weight: 800; color: #78909c; }
+    .hud-val { font-size: clamp(15px, 3.4vw, 19px); font-weight: 900; color: var(--pri-dark); }
+    .hud-val.warn { color: #e53935; animation: pulseWarn 0.55s infinite alternate; }
+    @keyframes pulseWarn {
+      from { transform: scale(1); }
+      to { transform: scale(1.08); }
+    }
+
+    /* お題バナー */
+    .mission-box {
+      flex-shrink: 0;
+      background: #fff;
+      border-radius: 18px;
+      border: 3px solid #b39ddb;
+      padding: 10px 14px;
+      text-align: center;
+      box-shadow: 0 4px 0 #b39ddb;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .mission-text {
+      font-family: 'Potta One', cursive;
+      font-size: clamp(18px, 4.5vw, 25px);
+      color: #4527a0;
+      line-height: 1.25;
+    }
+    .mission-sub {
+      font-size: 12px;
+      font-weight: 800;
+      color: #7e57c2;
+      min-height: 18px;
+    }
+
+    /* バブルステージ */
+    .stage {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      background: linear-gradient(180deg, #e1f5fe 0%, #e8eaf6 55%, #ede7f6 100%);
+      border-radius: 24px;
+      border: 4px solid #b39ddb;
+      box-shadow: 0 6px 0 #9575cd, inset 0 0 30px rgba(126, 87, 194, 0.08);
+      overflow: hidden;
+    }
+
+    /* シャボン玉 */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Potta One', cursive;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.28);
+      cursor: pointer;
+      border: 3px solid rgba(255,255,255,0.85);
+      box-shadow:
+        inset -6px -8px 14px rgba(0,0,0,0.12),
+        inset 6px 8px 14px rgba(255,255,255,0.65),
+        0 6px 14px rgba(0,0,0,0.14);
+      will-change: transform, left, top;
+      transition: transform 0.1s;
+    }
+    .bubble::after {
+      content: '';
+      position: absolute;
+      top: 14%;
+      left: 18%;
+      width: 24%;
+      height: 14%;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.65);
+      transform: rotate(-28deg);
+      pointer-events: none;
+    }
+    .bubble:active {
+      transform: scale(0.92);
+    }
+    .bubble.selected {
+      border: 4px solid #ffeb3b;
+      box-shadow:
+        0 0 0 4px rgba(255, 235, 59, 0.55),
+        inset 6px 8px 14px rgba(255,255,255,0.7),
+        0 8px 18px rgba(0,0,0,0.22);
+      transform: scale(1.1);
+    }
+    .bubble.wrong-shake {
+      animation: wrongShake 0.28s ease;
+    }
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-7px); }
+      75% { transform: translateX(7px); }
+    }
+
+    /* 水滴パーティクル */
+    .droplet {
+      position: absolute;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: dropFly 0.45s ease-out forwards;
+    }
+    @keyframes dropFly {
+      0% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
+    }
+
+    /* スコアポップ */
+    .pop-score {
+      position: absolute;
+      font-family: 'Potta One', cursive;
+      font-size: 20px;
+      pointer-events: none;
+      text-shadow: 0 2px 0 #fff, 0 -2px 0 #fff, 2px 0 0 #fff, -2px 0 0 #fff;
+      animation: popUp 0.65s ease-out forwards;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .pop-score.good { color: #2e7d32; }
+    .pop-score.bad { color: #e53935; }
+    @keyframes popUp {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); }
+      30% { opacity: 1; transform: translate(-50%, -18px) scale(1.15); }
+      100% { opacity: 0; transform: translate(-50%, -52px) scale(0.95); }
+    }
+
+    /* リザルトオーバーレイ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(38, 50, 56, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    .overlay.show { display: flex; }
+    .result-card {
+      background: #fff;
+      border-radius: 28px;
+      border: 5px solid #b39ddb;
+      padding: 26px 24px;
+      width: min(400px, 100%);
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+      animation: cardIn 0.25s ease-out;
+    }
+    @keyframes cardIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .result-title {
+      font-family: 'Potta One', cursive;
+      font-size: 28px;
+      color: var(--pri);
+      margin-bottom: 14px;
+    }
+    .result-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .r-box {
+      background: #f3e5f5;
+      border-radius: 16px;
+      padding: 10px;
+      border: 2px solid #d1c4e9;
+    }
+    .r-label { font-size: 12px; font-weight: 800; color: #78909c; }
+    .r-val { font-size: 23px; font-weight: 900; color: var(--pri-dark); }
+    .retry-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 18px;
+      border: none;
+      background: var(--pri);
+      color: #fff;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--pri-dark);
+    }
+    .retry-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--pri-dark); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top-bar">
+      <a href="index.html" class="pill-btn">🏠 TOP</a>
+      <h1 class="game-title">🫧 かずバブル！</h1>
+      <button id="sound-btn" class="pill-btn sound-on" type="button">🎵 ON</button>
+    </header>
+
+    <div class="controls-row">
+      <div class="chip-group" id="diff-group">
+        <button class="mode-chip active" data-diff="easy" type="button">かんたん</button>
+        <button class="mode-chip" data-diff="normal" type="button">ふつう</button>
+        <button class="mode-chip" data-diff="hard" type="button">むずかしい</button>
+      </div>
+      <div class="chip-group" id="time-group">
+        <button class="mode-chip active" data-sec="45" type="button">⏱️ 45びょう</button>
+        <button class="mode-chip" data-sec="60" type="button">⏱️ 60びょう</button>
+      </div>
+    </div>
+
+    <div class="hud">
+      <div class="hud-box">
+        <div class="hud-label">のこりじかん</div>
+        <div class="hud-val" id="hud-time">45</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">スコア</div>
+        <div class="hud-val" id="hud-score">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">コンボ</div>
+        <div class="hud-val" id="hud-combo">0</div>
+      </div>
+      <div class="hud-box">
+        <div class="hud-label">ハイスコア</div>
+        <div class="hud-val" id="hud-best">0</div>
+      </div>
+    </div>
+
+    <section class="mission-box">
+      <div class="mission-text" id="mission-text">5より 大きい数を われ！</div>
+      <div class="mission-sub" id="mission-sub">お題にあう バブルを タップしよう！</div>
+    </section>
+
+    <main class="stage" id="stage"></main>
+  </div>
+
+  <div class="overlay" id="result-overlay">
+    <div class="result-card">
+      <div class="result-title">🫧 タイムアップ！</div>
+      <div class="result-stats">
+        <div class="r-box">
+          <div class="r-label">スコア</div>
+          <div class="r-val" id="res-score">0てん</div>
+        </div>
+        <div class="r-box">
+          <div class="r-label">ハイスコア</div>
+          <div class="r-val" id="res-best">0てん</div>
+        </div>
+        <div class="r-box">
+          <div class="r-label">さいだいコンボ</div>
+          <div class="r-val" id="res-combo">0</div>
+        </div>
+        <div class="r-box">
+          <div class="r-label">せいかい数</div>
+          <div class="r-val" id="res-hits">0こ</div>
+        </div>
+      </div>
+      <button class="retry-btn" id="retry-btn" type="button">🫧 もういちど あそぶ</button>
+    </div>
+  </div>
+
+  <script>
+    const BUBBLE_COLORS = [
+      'radial-gradient(circle at 30% 30%, #ff8a80, #e53935)',
+      'radial-gradient(circle at 30% 30%, #80d8ff, #0288d1)',
+      'radial-gradient(circle at 30% 30%, #b9f6ca, #2e7d32)',
+      'radial-gradient(circle at 30% 30%, #ffd180, #ef6c00)',
+      'radial-gradient(circle at 30% 30%, #ea80fc, #8e24aa)',
+      'radial-gradient(circle at 30% 30%, #ff80ab, #d81b60)'
+    ];
+    const DROP_COLORS = ['#ff5252', '#29b6f6', '#66bb6a', '#ffa726', '#ab47bc', '#ec407a'];
+
+    const BEST_KEY_PREFIX = 'keisan_bubble_best_';
+    const $ = id => document.getElementById(id);
+
+    const stageEl = $('stage');
+    const missionTextEl = $('mission-text');
+    const missionSubEl = $('mission-sub');
+    const hudTimeEl = $('hud-time');
+    const hudScoreEl = $('hud-score');
+    const hudComboEl = $('hud-combo');
+    const hudBestEl = $('hud-best');
+    const overlayEl = $('result-overlay');
+
+    let diff = 'easy';
+    let durationSec = 45;
+    let soundOn = true;
+    let audioCtx = null;
+
+    let score = 0;
+    let combo = 0;
+    let maxCombo = 0;
+    let hits = 0;
+    let timeLeft = 45;
+    let running = false;
+    let timerStarted = false;
+    let timerId = null;
+    let rafId = null;
+    let lastFrameTime = 0;
+    let spawnAccumulator = 0;
+
+    let bubbles = [];
+    let nextBubbleId = 1;
+    let selectedBubble = null;
+    let currentMission = null;
+    let missionProgress = 0;
+
+    function getBest() {
+      return Number(localStorage.getItem(`${BEST_KEY_PREFIX}${diff}_${durationSec}`) || 0);
+    }
+    function setBest(val) {
+      localStorage.setItem(`${BEST_KEY_PREFIX}${diff}_${durationSec}`, String(val));
+    }
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playPopSfx(comboCount) {
+      if (!soundOn) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const baseFreq = Math.min(960, 420 + comboCount * 32);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(baseFreq, now);
+      osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.65, now + 0.08);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.11);
+    }
+
+    function playSelectSfx() {
+      if (!soundOn) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(580, now);
+      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    }
+
+    function playWrongSfx() {
+      if (!soundOn) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(210, now);
+      osc.frequency.linearRampToValueAtTime(150, now + 0.16);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.19);
+    }
+
+    function playFinishSfx() {
+      if (!soundOn) return;
+      ensureAudio();
+      if (!audioCtx) return;
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => {
+        const now = audioCtx.currentTime + idx * 0.08;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, now);
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      });
+    }
+
+    function pickMission() {
+      missionProgress = 0;
+      if (diff === 'easy') {
+        const pool = [
+          {
+            id: 'gt5',
+            text: '5より 大きい数を われ！',
+            sub: '6 〜 20 の バブルを タップしよう',
+            goal: 4,
+            check: n => n > 5,
+            prefer: () => 6 + Math.floor(Math.random() * 15)
+          },
+          {
+            id: 'lt5',
+            text: '5より 小さい数を われ！',
+            sub: '1 〜 4 の バブルを タップしよう',
+            goal: 3,
+            check: n => n < 5,
+            prefer: () => 1 + Math.floor(Math.random() * 4)
+          },
+          (() => {
+            const target = 1 + Math.floor(Math.random() * 10);
+            return {
+              id: 'find',
+              text: `「${target}」の かずを われ！`,
+              sub: `数字が ${target} の バブルを さがそう`,
+              goal: 2,
+              check: n => n === target,
+              prefer: () => target
+            };
+          })()
+        ];
+        let next;
+        do {
+          next = pool[Math.floor(Math.random() * pool.length)];
+        } while (currentMission && next.id === currentMission.id && pool.length > 1);
+        currentMission = next;
+      } else if (diff === 'normal') {
+        const pool = [
+          {
+            id: 'even',
+            text: 'ぐうすう（2, 4, 6...）だけ われ！',
+            sub: '2で わりきれる かずを タップしよう',
+            goal: 4,
+            check: n => n % 2 === 0,
+            prefer: () => (1 + Math.floor(Math.random() * 10)) * 2
+          },
+          {
+            id: 'odd',
+            text: 'きすう（1, 3, 5...）だけ われ！',
+            sub: '2で わりきれない かずを タップしよう',
+            goal: 4,
+            check: n => n % 2 === 1,
+            prefer: () => (Math.floor(Math.random() * 10)) * 2 + 1
+          },
+          {
+            id: 'gt10',
+            text: '10より 大きい数を われ！',
+            sub: '11 〜 20 の バブルを タップしよう',
+            goal: 4,
+            check: n => n > 10,
+            prefer: () => 11 + Math.floor(Math.random() * 10)
+          }
+        ];
+        let next;
+        do {
+          next = pool[Math.floor(Math.random() * pool.length)];
+        } while (currentMission && next.id === currentMission.id && pool.length > 1);
+        currentMission = next;
+      } else {
+        currentMission = {
+          id: 'pair10',
+          text: 'あわせて 10になる 2つを われ！',
+          sub: '1つ目を えらんで、合計10になる 2つ目を タップ！',
+          goal: 999,
+          check: () => false,
+          prefer: () => 1 + Math.floor(Math.random() * 9)
+        };
+      }
+
+      missionTextEl.textContent = currentMission.text;
+      missionSubEl.textContent = currentMission.sub;
+    }
+
+    function chooseBubbleNumber() {
+      if (diff === 'hard') {
+        // 画面上にある数字の補数（10 - n）を高い確率で混ぜてペアを作りやすくする
+        if (bubbles.length > 0 && Math.random() < 0.6) {
+          const pick = bubbles[Math.floor(Math.random() * bubbles.length)];
+          const comp = 10 - pick.num;
+          if (comp >= 1 && comp <= 9) return comp;
+        }
+        return 1 + Math.floor(Math.random() * 9);
+      }
+
+      // かんたん・ふつう：お題に合う数字が約55%の確率で出るように調整
+      if (currentMission && Math.random() < 0.55) {
+        return currentMission.prefer();
+      }
+      return 1 + Math.floor(Math.random() * 20);
+    }
+
+    function spawnBubble(initialY = null) {
+      const rect = stageEl.getBoundingClientRect();
+      if (rect.width < 100 || rect.height < 100) return;
+
+      const size = 64 + Math.floor(Math.random() * 15); // 64px〜78px
+      const pad = 12;
+      const maxX = Math.max(pad, rect.width - size - pad);
+
+      // 重なりすぎないX位置を最大8回試行して決定
+      let x = pad + Math.random() * (maxX - pad);
+      const y = initialY !== null ? initialY : rect.height + size * 0.3;
+
+      for (let t = 0; t < 8; t++) {
+        const candX = pad + Math.random() * (maxX - pad);
+        const tooClose = bubbles.some(b => {
+          const dx = (b.x + b.size / 2) - (candX + size / 2);
+          const dy = (b.y + b.size / 2) - (y + size / 2);
+          return Math.hypot(dx, dy) < (b.size + size) * 0.62;
+        });
+        if (!tooClose) {
+          x = candX;
+          break;
+        }
+      }
+
+      const num = chooseBubbleNumber();
+      const colorIdx = Math.floor(Math.random() * BUBBLE_COLORS.length);
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'bubble';
+      el.textContent = num;
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.fontSize = Math.round(size * 0.4) + 'px';
+      el.style.background = BUBBLE_COLORS[colorIdx];
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+
+      const bubbleObj = {
+        id: nextBubbleId++,
+        num,
+        size,
+        baseX: x,
+        x,
+        y,
+        speed: 44 + Math.random() * 34,
+        swayAmp: 6 + Math.random() * 10,
+        swayFreq: 1.3 + Math.random() * 1.2,
+        phase: Math.random() * Math.PI * 2,
+        colorIdx,
+        el
+      };
+
+      el.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        onTapBubble(bubbleObj);
+      });
+
+      stageEl.appendChild(el);
+      bubbles.push(bubbleObj);
+    }
+
+    function createPopEffects(cx, cy, colorIdx, label, isGood) {
+      for (let i = 0; i < 8; i++) {
+        const d = document.createElement('div');
+        d.className = 'droplet';
+        d.style.left = cx + 'px';
+        d.style.top = cy + 'px';
+        d.style.background = DROP_COLORS[colorIdx];
+        const angle = (Math.PI * 2 * i) / 8 + (Math.random() * 0.3 - 0.15);
+        const dist = 26 + Math.random() * 24;
+        d.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+        d.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+        stageEl.appendChild(d);
+        setTimeout(() => d.remove(), 460);
+      }
+
+      const pop = document.createElement('div');
+      pop.className = 'pop-score ' + (isGood ? 'good' : 'bad');
+      pop.textContent = label;
+      pop.style.left = cx + 'px';
+      pop.style.top = cy + 'px';
+      stageEl.appendChild(pop);
+      setTimeout(() => pop.remove(), 660);
+    }
+
+    function removeBubble(b) {
+      b.el.remove();
+      bubbles = bubbles.filter(item => item.id !== b.id);
+    }
+
+    function startTimerIfNeeded() {
+      if (timerStarted) return;
+      timerStarted = true;
+      timerId = setInterval(() => {
+        timeLeft--;
+        updateHud();
+        if (timeLeft <= 0) {
+          finishGame();
+        }
+      }, 1000);
+    }
+
+    function onTapBubble(b) {
+      if (!running) return;
+      startTimerIfNeeded();
+
+      const cx = b.x + b.size / 2;
+      const cy = b.y + b.size / 2;
+
+      if (diff === 'hard') {
+        if (!selectedBubble) {
+          selectedBubble = b;
+          b.el.classList.add('selected');
+          playSelectSfx();
+          missionSubEl.textContent = `えらんだ数: ${b.num}（あと ${10 - b.num} で 10！）`;
+          return;
+        }
+        if (selectedBubble.id === b.id) {
+          b.el.classList.remove('selected');
+          selectedBubble = null;
+          missionSubEl.textContent = currentMission.sub;
+          return;
+        }
+
+        const first = selectedBubble;
+        first.el.classList.remove('selected');
+        selectedBubble = null;
+
+        if (first.num + b.num === 10) {
+          combo++;
+          if (combo > maxCombo) maxCombo = combo;
+          hits += 2;
+          const pts = 20 + combo * 4;
+          score += pts;
+          playPopSfx(combo);
+          createPopEffects(first.x + first.size / 2, first.y + first.size / 2, first.colorIdx, `${first.num}+${b.num}=10!`, true);
+          createPopEffects(cx, cy, b.colorIdx, `+${pts}`, true);
+          removeBubble(first);
+          removeBubble(b);
+          missionSubEl.textContent = `✨ ぴったり10！ コンボ ${combo}！`;
+        } else {
+          combo = 0;
+          score = Math.max(0, score - 5);
+          playWrongSfx();
+          b.el.classList.remove('wrong-shake');
+          void b.el.offsetWidth;
+          b.el.classList.add('wrong-shake');
+          createPopEffects(cx, cy, b.colorIdx, `${first.num}+${b.num}=${first.num + b.num} おしい`, false);
+          missionSubEl.textContent = currentMission.sub;
+        }
+        updateHud();
+        return;
+      }
+
+      // かんたん・ふつう
+      if (currentMission.check(b.num)) {
+        combo++;
+        if (combo > maxCombo) maxCombo = combo;
+        hits++;
+        const pts = 10 + combo * 2;
+        score += pts;
+        playPopSfx(combo);
+        createPopEffects(cx, cy, b.colorIdx, combo >= 3 ? `+${pts} (${combo}れんぞく!)` : `+${pts}`, true);
+        removeBubble(b);
+
+        missionProgress++;
+        if (missionProgress >= currentMission.goal) {
+          pickMission();
+        }
+      } else {
+        combo = 0;
+        score = Math.max(0, score - 5);
+        playWrongSfx();
+        createPopEffects(cx, cy, b.colorIdx, '-5 ちがうよ!', false);
+        removeBubble(b);
+      }
+      updateHud();
+    }
+
+    function updateHud() {
+      hudTimeEl.textContent = timeLeft;
+      hudTimeEl.classList.toggle('warn', timeLeft <= 10 && timeLeft > 0);
+      hudScoreEl.textContent = score;
+      hudComboEl.textContent = combo;
+      if (score > getBest()) {
+        setBest(score);
+      }
+      hudBestEl.textContent = getBest();
+    }
+
+    function gameLoop(ts) {
+      if (!running) return;
+      if (!lastFrameTime) lastFrameTime = ts;
+      const dt = Math.min(0.05, (ts - lastFrameTime) / 1000);
+      lastFrameTime = ts;
+
+      const stageH = stageEl.clientHeight;
+      const stageW = stageEl.clientWidth;
+
+      spawnAccumulator += dt;
+      const spawnInterval = diff === 'hard' ? 0.72 : 0.8;
+      const maxBubbles = diff === 'hard' ? 11 : 10;
+      if (spawnAccumulator >= spawnInterval && bubbles.length < maxBubbles) {
+        spawnAccumulator = 0;
+        spawnBubble();
+      }
+
+      const tSec = ts / 1000;
+      for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        b.y -= b.speed * dt;
+        const sway = Math.sin(tSec * b.swayFreq + b.phase) * b.swayAmp;
+        b.x = Math.max(6, Math.min(stageW - b.size - 6, b.baseX + sway));
+        b.el.style.left = b.x + 'px';
+        b.el.style.top = b.y + 'px';
+
+        if (b.y < -b.size - 10) {
+          if (selectedBubble && selectedBubble.id === b.id) {
+            selectedBubble = null;
+            missionSubEl.textContent = currentMission.sub;
+          }
+          b.el.remove();
+          bubbles.splice(i, 1);
+        }
+      }
+
+      rafId = requestAnimationFrame(gameLoop);
+    }
+
+    function finishGame() {
+      running = false;
+      clearInterval(timerId);
+      timerId = null;
+      cancelAnimationFrame(rafId);
+      if (score > getBest()) setBest(score);
+      updateHud();
+      playFinishSfx();
+      $('res-score').textContent = score + 'てん';
+      $('res-best').textContent = getBest() + 'てん';
+      $('res-combo').textContent = maxCombo;
+      $('res-hits').textContent = hits + 'こ';
+      overlayEl.classList.add('show');
+    }
+
+    function resetGame() {
+      running = false;
+      clearInterval(timerId);
+      timerId = null;
+      cancelAnimationFrame(rafId);
+      timerStarted = false;
+      lastFrameTime = 0;
+      spawnAccumulator = 0;
+
+      bubbles.forEach(b => b.el.remove());
+      bubbles = [];
+      selectedBubble = null;
+
+      score = 0;
+      combo = 0;
+      maxCombo = 0;
+      hits = 0;
+      timeLeft = durationSec;
+      overlayEl.classList.remove('show');
+
+      pickMission();
+      updateHud();
+
+      // 初期バブルをいくつか配置
+      const h = stageEl.clientHeight || 420;
+      for (let i = 0; i < 6; i++) {
+        spawnBubble(h * (0.28 + i * 0.11));
+      }
+
+      running = true;
+      rafId = requestAnimationFrame(gameLoop);
+    }
+
+    $('diff-group').addEventListener('click', e => {
+      const btn = e.target.closest('.mode-chip');
+      if (!btn) return;
+      diff = btn.dataset.diff;
+      document.querySelectorAll('#diff-group .mode-chip').forEach(c => c.classList.toggle('active', c === btn));
+      resetGame();
+    });
+
+    $('time-group').addEventListener('click', e => {
+      const btn = e.target.closest('.mode-chip');
+      if (!btn) return;
+      durationSec = Number(btn.dataset.sec);
+      document.querySelectorAll('#time-group .mode-chip').forEach(c => c.classList.toggle('active', c === btn));
+      resetGame();
+    });
+
+    $('sound-btn').addEventListener('click', () => {
+      soundOn = !soundOn;
+      const b = $('sound-btn');
+      b.textContent = soundOn ? '🎵 ON' : '🔇 OFF';
+      b.classList.toggle('sound-on', soundOn);
+      if (soundOn) playSelectSfx();
+    });
+
+    $('retry-btn').addEventListener('click', resetGame);
+
+    resetGame();
+  </script>
+</body>
+</html>
