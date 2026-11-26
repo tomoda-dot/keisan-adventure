@@ -1,0 +1,165 @@
+/* サンリオ調 パステル＆ゆめかわ共通テーマ */
+:root {
+  --kawaii-ink: #5d4752;
+  --kawaii-pink: #ff8fb8;
+  --kawaii-pink-dark: #e06392;
+  --kawaii-pink-soft: #fff0f6;
+  --kawaii-blue: #8fd3ff;
+  --kawaii-mint: #8ce6c8;
+  --kawaii-lavender: #c9a7ff;
+  --kawaii-cream: #fff9e6;
+}
+
+/* 全体のふんわりパステル水玉背景とココアブラウン文字 */
+html, body {
+  color: var(--kawaii-ink) !important;
+  background-color: #fff5f9 !important;
+  background-image:
+    radial-gradient(rgba(255, 168, 204, 0.28) 2.5px, transparent 2.5px),
+    radial-gradient(rgba(162, 221, 255, 0.28) 2.5px, transparent 2.5px) !important;
+  background-size: 32px 32px !important;
+  background-position: 0 0, 16px 16px !important;
+}
+
+/* 単色メインバーをミルキーパステル調に */
+.top-bar {
+  background: var(--kawaii-bar, #ff8fb8) !important;
+  box-shadow: 0 4px 0 var(--kawaii-bar-dark, #e06392) !important;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.55);
+}
+
+.game-title {
+  text-shadow: 0 2px 0 rgba(160, 60, 100, 0.28) !important;
+  letter-spacing: 0.03em;
+}
+
+.pill-btn {
+  border: 2.5px solid #ffd1e3 !important;
+  color: var(--kawaii-ink) !important;
+  background: #ffffff !important;
+  box-shadow: 0 3px 0 rgba(224, 99, 146, 0.22) !important;
+}
+.pill-btn.sound-on {
+  background: #fff9db !important;
+  color: #d97706 !important;
+  border-color: #ffe082 !important;
+}
+
+/* 難易度チップ・HUDのふんわり化 */
+.chip-group {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 2.5px solid #ffd6e7 !important;
+  box-shadow: 0 3px 0 rgba(255, 143, 184, 0.18);
+}
+.mode-chip {
+  color: #7c6270 !important;
+}
+.mode-chip.active {
+  background: var(--kawaii-bar, #ff8fb8) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 0 var(--kawaii-bar-dark, #e06392) !important;
+}
+
+.hud-box,
+.summary-card,
+.quest-card,
+.customer-card,
+.goal-card,
+.mission-box,
+.tray-card,
+.stage,
+.place-col {
+  border-color: #ffcce0 !important;
+  box-shadow: 0 5px 0 rgba(255, 143, 184, 0.24) !important;
+}
+
+.hud-val,
+.total-num,
+.quest-text,
+.goal-text,
+.mission-text,
+.tray-total {
+  color: #b84a7a !important;
+}
+
+/* 応援マスコットウィジェット */
+.kawaii-buddy {
+  position: fixed;
+  right: 10px;
+  bottom: 94px;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.kawaii-bubble {
+  background: #ffffff;
+  color: #6b4c57;
+  border: 2.5px solid #ffb3d1;
+  border-radius: 16px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(255, 143, 184, 0.25);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px) scale(0.9);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  position: relative;
+}
+.kawaii-bubble.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.kawaii-bubble::after {
+  content: '';
+  position: absolute;
+  right: 18px;
+  bottom: -7px;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-right: 2.5px solid #ffb3d1;
+  border-bottom: 2.5px solid #ffb3d1;
+  transform: rotate(45deg);
+}
+.kawaii-mascot-btn {
+  pointer-events: auto;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  background: radial-gradient(circle at 30% 30%, #ffffff, #ffe3ef);
+  box-shadow: 0 5px 14px rgba(224, 99, 146, 0.3);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: kawaiiFloat 2.6s ease-in-out infinite;
+  transition: transform 0.12s;
+}
+.kawaii-mascot-btn:active {
+  transform: scale(0.9);
+}
+.kawaii-mascot-btn.hop {
+  animation: kawaiiHop 0.4s ease;
+}
+@keyframes kawaiiFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes kawaiiHop {
+  0%, 100% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-14px) scale(1.08); }
+}
+
+/* ページごとのパステルバー色 */
+body.theme-pastel-pink     { --kawaii-bar: #ff8fb8; --kawaii-bar-dark: #e06392; }
+body.theme-pastel-blue     { --kawaii-bar: #7cc7ff; --kawaii-bar-dark: #4ba3e3; }
+body.theme-pastel-mint     { --kawaii-bar: #6fd9b7; --kawaii-bar-dark: #42b390; }
+body.theme-pastel-lavender { --kawaii-bar: #b99aff; --kawaii-bar-dark: #8f6ee0; }
+body.theme-pastel-peach    { --kawaii-bar: #ffaa85; --kawaii-bar-dark: #e37f57; }
+body.theme-pastel-lemon    { --kawaii-bar: #f7c954; --kawaii-bar-dark: #d4a024; }
